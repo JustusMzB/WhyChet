@@ -14,6 +14,14 @@ public class Message implements Serializable {
         this.roomID = roomID;
     }
 
+    public String toString(){
+        return sender +"\n" + content + "\n Time: " + timeOfDeparture + "\n ID: " + roomID;
+    }
+
+    public String displayString(){
+        return sender + "; " + timeOfDeparture +"\n" + content;
+    }
+
     public String getSender() {
         return sender;
     }
