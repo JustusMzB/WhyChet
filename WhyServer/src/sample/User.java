@@ -1,3 +1,5 @@
+package sample;
+
 import java.net.*;
 
 public class User {
@@ -6,12 +8,10 @@ public class User {
     private String password;
     private boolean online;
 
-    //public Room& room;
-    public User(String name, String password, Socket socket) {
+    //public sample.Room& room;
+    public User(Socket socket) {
         online = false;
         this.socket = socket;
-        this.name = name;
-        this.password = password;
     }
 
     public Socket getSocket() {
