@@ -22,12 +22,13 @@ public class Server {
     public Server(int port){
         try {
             serverSocket = new ServerSocket(port);
-            serverSocket.setSoTimeout(10000);
+            serverSocket.setSoTimeout(100000);
         } catch (IOException e) {
             e.printStackTrace();
         }
         rooms.add(new Room(1));
     }
+
     public void clientListener(){
         Socket newClient;
         while (true){
@@ -36,7 +37,7 @@ public class Server {
                 newClient = serverSocket.accept();
                 clientHandlers.add(new ClientHandler(newClient, this));
                 clientHandlers.get(clientHandlers.size() - 1).start();
-                System.out.println("Connected Clients:");
+                System.out.println("New Client connected.");
                 for(ClientHandler i : clientHandlers){
                     if (!i.isAlive()){ // Should be in a different function called Cleanup
                         System.out.println(i.getClient().getLocalPort());

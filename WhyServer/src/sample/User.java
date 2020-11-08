@@ -13,6 +13,11 @@ public class User {
         online = false;
         this.socket = socket;
     }
+    public User(String name, String password, Socket socket){
+        this.name = name;
+        this.password = password;
+        this.socket = socket;
+    }
 
     public Socket getSocket() {
         return socket;
