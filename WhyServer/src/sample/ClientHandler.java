@@ -119,7 +119,7 @@ public class ClientHandler extends Thread {
 
             //Test Block Interaction
             String messageText;
-            while (true){
+            while (!client.isClosed()){
                 messageText = receiveText();
                 if(messageText.contains("/close")){
                     sendText("Alright. Connection closing...");
