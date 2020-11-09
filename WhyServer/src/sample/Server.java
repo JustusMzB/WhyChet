@@ -35,7 +35,7 @@ public class Server {
     public Server(int port){
         try {
             serverSocket = new ServerSocket(port);
-            serverSocket.setSoTimeout(100000);
+            //serverSocket.setSoTimeout(500000);
         } catch (IOException e) {
             e.printStackTrace();
         }
