@@ -5,16 +5,48 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+
 public class ClientHandler extends Thread {
-    public Socket getClient() {
-        return client;
-    }
 
     private Socket client;
     private Server server;
     private User user;
     private ObjectOutputStream msgOut;
     private ObjectInputStream msgIn;
+
+
+    public Socket getClient() {
+        return client;
+    }
+
+    /*private class InputHandler extends Thread{
+        @Override
+
+        private void orderHandling(Message order){} // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
+        public void run() {
+            while (true){
+
+                try {
+                    Message message = (Message)(msgIn.readObject());
+                    if(message.getRoomID() > 0) {
+                        server.getRooms().get(0).addMessage(message);
+                    } else {
+                        orderHandling(message);
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    System.err.println("[CLIENTHANDLER] Faulty Instream");
+                    try {
+                        client.close();
+                    } catch (IOException ioException) {
+                        System.err.println("[CLIENTHANDLER] Couldnt close client connection.");
+                    }
+                    break;
+                }
+            }
+        }
+    }*/
+
+
 
     public ClientHandler(Socket client, Server server){
         this.client = client;
@@ -33,6 +65,11 @@ public class ClientHandler extends Thread {
             return ((Message)msgIn.readObject()).getContent();
         } catch (IOException | ClassNotFoundException | NullPointerException e) {
             System.out.println("[CLIENTHANDLER] " + client.getInetAddress() + ": Couldnt receive Text");
+            try {
+                client.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
             return "";
         }
     }
@@ -42,6 +79,11 @@ public class ClientHandler extends Thread {
             msgOut.writeObject(message);
         } catch (IOException | NullPointerException e) {
             System.out.println("[CLIENTHANDLER]"+ client.getInetAddress() + ": Couldnt send message" + message);
+            try {
+                client.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         }
     }
 
@@ -91,7 +133,7 @@ public class ClientHandler extends Thread {
             client.close();
             user.setOnline(false);
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             System.err.println("[CLIENTHANDLER] " + currentThread() + " Crashed.");
             e.printStackTrace();
             try {
@@ -108,7 +150,6 @@ public class ClientHandler extends Thread {
 /*
 Currently in complete super Alpha.
 TO DO:
-    *Login Dialogue with User Addition
     *Continuous chat dialogue
     *By Checking for new Messages in Room and sending them to Client
  */

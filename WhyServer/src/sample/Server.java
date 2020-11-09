@@ -11,6 +11,19 @@ public class Server {
     private Set<User> users = Collections.synchronizedSet(new HashSet<User>());
     private ServerSocket serverSocket;
 
+    private void clientHandlerCleanup(){
+        ArrayList<Integer> deleteHere = new ArrayList<>();
+        for(int i = 0; i < clientHandlers.size(); i++){
+            if(!clientHandlers.get(i).isAlive()){
+                deleteHere.add(i);
+            }
+        }
+        Collections.sort(deleteHere);
+        for(int i = deleteHere.size()-1; i>= 0; i--){
+            clientHandlers.remove(deleteHere.get(i).intValue());
+        }
+    }
+
     public List<Room> getRooms() {
         return rooms;
     }
@@ -38,11 +51,7 @@ public class Server {
                 clientHandlers.add(new ClientHandler(newClient, this));
                 clientHandlers.get(clientHandlers.size() - 1).start();
                 System.out.println("New Client connected.");
-                for(ClientHandler i : clientHandlers){
-                    if (!i.isAlive()){ // Should be in a different function called Cleanup
-                        System.out.println(i.getClient().getLocalPort());
-                    }
-                }
+                clientHandlerCleanup();
             } catch (IOException e) {
                 System.err.println("[SERVER] Connection Error in main Loop / Timeout");
                 e.printStackTrace();
