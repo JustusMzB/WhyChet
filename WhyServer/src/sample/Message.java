@@ -1,4 +1,10 @@
+package sample;
+
 import java.io.Serializable;
+/* TO DO
+    *Timestamp Implementation
+
+ */
 
 public class Message implements Serializable {
     private String sender;
