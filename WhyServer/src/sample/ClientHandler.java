@@ -23,8 +23,8 @@ public class ClientHandler extends Thread {
 
         private void orderHandling(Message order){
             System.out.println("[CLIENTHANDLER]" + user.getName() + " Received an order");
-            switch ((int) order.getRoomID()){
-                case -1:
+            switch ((int) order.getRoomID()) {
+                case -1 -> {
                     sendText("Alright. Connection closing...");
                     try {
                         client.close();
@@ -33,10 +33,8 @@ public class ClientHandler extends Thread {
                         e.printStackTrace();
                     }
                     user.setOnline(false);
-                    break;
-
-                default:
-                    System.err.println("Received unknown order ID: " + order.getRoomID()+ " from user " + user.getName());
+                }
+                default -> System.err.println("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
             }
         } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
 
@@ -151,6 +149,9 @@ public class ClientHandler extends Thread {
                 sendText("Login Successful. You are now online.\n" + "Users Online:\n"+server.onlineUserString());
             }
         }
+        for(Room i : server.getRooms()){
+            i.addMessage(new Message("[SERVER]", user.getName() + " just came online", i.getId()));
+        }
 
 
     }
@@ -170,9 +171,11 @@ public class ClientHandler extends Thread {
                     messageAmount ++;
                 }
         }
-
-
         //End of Connection has to be triggered in some interaction process, preferrably orderhandler
+
+        for (Room i : server.getRooms()){
+            i.addMessage(new Message("[SERVER]", user.getName() + " went offline", i.getId()));
+        }
 
 
     }
