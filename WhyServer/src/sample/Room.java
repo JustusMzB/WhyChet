@@ -18,4 +18,12 @@ public class Room {
 /*TO DO
     *Users in Room
  */
+    private List<String> members = Collections.synchronizedList(new LinkedList<String>());
+    public void addMember(String name){
+        members.add(name);
+    }
+
+    public void removeMember(String name){
+        members.remove(name);
+    }
 }

@@ -1,6 +1,7 @@
 package sample;
 
 import java.io.Serializable;
+import java.util.Date;
 /* TO DO
     *Timestamp Implementation
 
@@ -9,6 +10,7 @@ import java.io.Serializable;
 public class Message implements Serializable {
     private String sender;
     private long timeOfDeparture;
+    private Date date;
     private String content;
     private long roomID;
 
