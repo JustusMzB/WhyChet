@@ -19,17 +19,44 @@ public class ClientHandler extends Thread {
         return client;
     }
 
-    /*private class InputHandler extends Thread{
-        @Override
+    private class InputHandler extends Thread{
 
-        private void orderHandling(Message order){} // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
+        private void orderHandling(Message order){
+            System.out.println("[CLIENTHANDLER]" + user.getName() + " Received an order");
+            switch ((int) order.getRoomID()) {
+                case -1 -> {
+                    sendText("Alright. Connection closing...");
+                    try {
+                        client.close();
+                    } catch (IOException e) {
+                        System.err.println("Couldnt close Connection");
+                        e.printStackTrace();
+                    }
+                    user.setOnline(false);
+                }
+                default -> System.err.println("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
+            }
+        } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
+
+        private void messageHandler(Message message){
+            System.out.println("[CLIENTHANDLER]" + user.getName() + " Received a Message");
+            Room myRoom;
+            int index = 0;
+            do {
+                myRoom = server.getRooms().get(index);
+                index++;
+            } while (index < server.getRooms().size() &&  myRoom.getId() != message.getRoomID());
+            myRoom.addMessage(message);
+        }
+
+        @Override
         public void run() {
             while (true){
 
                 try {
                     Message message = (Message)(msgIn.readObject());
                     if(message.getRoomID() > 0) {
-                        server.getRooms().get(0).addMessage(message);
+                        messageHandler(message);
                     } else {
                         orderHandling(message);
                     }
@@ -44,7 +71,7 @@ public class ClientHandler extends Thread {
                 }
             }
         }
-    }*/
+    }
 
 
 
@@ -65,6 +92,7 @@ public class ClientHandler extends Thread {
             return ((Message)msgIn.readObject()).getContent();
         } catch (IOException | ClassNotFoundException | NullPointerException e) {
             System.out.println("[CLIENTHANDLER] " + client.getInetAddress() + ": Couldnt receive Text");
+            user.setOnline(false);
             try {
                 client.close();
             } catch (IOException ioException) {
@@ -79,6 +107,20 @@ public class ClientHandler extends Thread {
             msgOut.writeObject(message);
         } catch (IOException | NullPointerException e) {
             System.out.println("[CLIENTHANDLER]"+ client.getInetAddress() + ": Couldnt send message" + message);
+            user.setOnline(false);
+            try {
+                client.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+    }
+    private void sendMessage(Message message){
+        try {
+            msgOut.writeObject(message);
+        } catch (IOException e) {
+            System.err.println("[CLIENTHANDLER] "+ client.getInetAddress() + " failed to send Message" + message.toString());
+            user.setOnline(false);
             try {
                 client.close();
             } catch (IOException ioException) {
@@ -107,43 +149,35 @@ public class ClientHandler extends Thread {
                 sendText("Login Successful. You are now online.\n" + "Users Online:\n"+server.onlineUserString());
             }
         }
+        for(Room i : server.getRooms()){
+            i.addMessage(new Message("[SERVER]", user.getName() + " just came online", i.getId()));
+        }
 
 
     }
 
     @Override
     public void run() {
-        try {
-            //Login
-            login();
+        //Login
+        login();
 
-            //Test Block Interaction
-            String messageText;
-            while (true){
-                messageText = receiveText();
-                if(messageText.contains("/close")){
-                    sendText("Alright. Connection closing...");
-                    break;
+        //Test Block Interaction
+        int messageAmount = server.getRooms().get(0).size();
+        InputHandler inputHandler = new InputHandler();
+        inputHandler.start();
+        while (!client.isClosed()){
+                for(int i = messageAmount; messageAmount < server.getRooms().get(0).size(); i++){
+                    sendMessage(server.getRooms().get(0).getMessage(i));
+                    messageAmount ++;
                 }
-                else sendText("You said: " + messageText);
-            }
-
-
-            //End of Connection
-            client.close();
-            user.setOnline(false);
-
-        } catch (IOException e) {
-            System.err.println("[CLIENTHANDLER] " + currentThread() + " Crashed.");
-            e.printStackTrace();
-            try {
-                client.close();
-                user.setOnline(false);
-            } catch (IOException ioException) {
-                System.err.println("Client connection couldnt be closed");
-                ioException.printStackTrace();
-            }
         }
+        //End of Connection has to be triggered in some interaction process, preferrably orderhandler
+
+        for (Room i : server.getRooms()){
+            i.addMessage(new Message("[SERVER]", user.getName() + " went offline", i.getId()));
+        }
+
+
     }
 }
 
