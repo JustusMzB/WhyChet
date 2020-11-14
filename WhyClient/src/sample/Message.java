@@ -2,20 +2,21 @@ package sample;
 
 import java.io.Serializable;
 import java.util.Date;
+/* TO DO
+    *Timestamp Implementation
+
+ */
 
 public class Message implements Serializable {
     private String sender;
+    private long timeOfDeparture = 0;
     private String content;
     private long roomID;
-    Date date;
-    String timeOfDeparture;
 
     public Message(String sender, String content, long roomID){
         this.sender = sender;
         this.content = content;
-        this.date = new Date();
         this.roomID = roomID;
-        this.timeOfDeparture = (new Anzeige(date).getUhrzeit());
     }
 
     public String toString(){
@@ -30,7 +31,7 @@ public class Message implements Serializable {
         return sender;
     }
 
-    public String getTimeOfDeparture() {
+    public long getTimeOfDeparture() {
         return timeOfDeparture;
     }
 

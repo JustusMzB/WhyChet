@@ -8,29 +8,8 @@ import java.util.*;
 public class Server {
     private ArrayList<ClientHandler> clientHandlers = new ArrayList<ClientHandler>();
     private List<Room> rooms = Collections.synchronizedList(new LinkedList<Room>());
-    private Set<User> users = Collections.synchronizedSet(new HashSet<User>());
+    private Map<String, User> users = Collections.synchronizedMap(new HashMap<String, User>());
     private ServerSocket serverSocket;
-
-    private void clientHandlerCleanup(){
-        ArrayList<Integer> deleteHere = new ArrayList<>();
-        for(int i = 0; i < clientHandlers.size(); i++){
-            if(!clientHandlers.get(i).isAlive()){
-                deleteHere.add(i);
-            }
-        }
-        Collections.sort(deleteHere);
-        for(int i = deleteHere.size()-1; i>= 0; i--){
-            clientHandlers.remove(deleteHere.get(i).intValue());
-        }
-    }
-
-    public List<Room> getRooms() {
-        return rooms;
-    }
-
-    public Set<User> getUsers() {
-        return users;
-    }
 
     public Server(int port){
         try {
@@ -42,7 +21,7 @@ public class Server {
         rooms.add(new Room(1));
     }
 
-    public void clientListener(){
+    public void clientSearch(){
         Socket newClient;
         while (true){
             try{
@@ -50,7 +29,7 @@ public class Server {
                 newClient = serverSocket.accept();
                 clientHandlers.add(new ClientHandler(newClient, this));
                 clientHandlers.get(clientHandlers.size() - 1).start();
-                System.out.println("New Client connected.");
+                System.out.println("[SERVER] New Client connected.");
                 clientHandlerCleanup();
             } catch (IOException e) {
                 System.err.println("[SERVER] Connection Error in main Loop / Timeout");
@@ -60,17 +39,28 @@ public class Server {
         }
     }
 
-    public String onlineUserString(){
-        String result = "";
-        for(User i : users){
-            if (i.isOnline()){
-                result += i.getName() + "\n";
+    private void clientHandlerCleanup(){
+        System.out.println("[SERVER] Starting Clienthandler-Collection cleanup...");
+        ArrayList<Integer> deleteHere = new ArrayList<>();
+        for(int i = 0; i < clientHandlers.size(); i++){
+            if(!clientHandlers.get(i).isAlive()){
+                deleteHere.add(i);
             }
         }
-        if(result.length() == 0){
-            result += "None";
+        Collections.sort(deleteHere);
+        for(int i = deleteHere.size()-1; i>= 0; i--){
+            System.out.println("[SERVER] [CLIENT-CLEANUP] deleting inactive Handler-Thread " +clientHandlers.get(i).getId());
+            clientHandlers.remove(deleteHere.get(i).intValue());
         }
-        return result;
+        System.out.println("[SERVER] Cleanup finished.");
+    }
+
+    public List<Room> getRooms() {
+        return rooms;
+    }
+
+    public Map<String, User> getUsers() {
+        return users;
     }
 }
 

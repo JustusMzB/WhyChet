@@ -13,28 +13,35 @@ public class ClientHandler extends Thread {
     private User user;
     private ObjectOutputStream msgOut;
     private ObjectInputStream msgIn;
+    private InputHandler inputHandler;
+    //Constructor
+    public ClientHandler(Socket client, Server server){
+        this.client = client;
+        this.server = server;
+        try {
+            this.msgOut = new ObjectOutputStream(client.getOutputStream());
+            this.msgIn = new ObjectInputStream(client.getInputStream());
+        } catch (IOException e) {
+            msgIn = null;
+            msgOut = null;
+        }
+        this.inputHandler = new InputHandler();
 
-
-    public Socket getClient() {
-        return client;
     }
 
+
+    //Internal Helper Thread
     private class InputHandler extends Thread{
 
         private void orderHandling(Message order){
             System.out.println("[CLIENTHANDLER]" + user.getName() + " Received an order");
             switch ((int) order.getRoomID()) {
-                case -1 -> {
+                case 1:{
                     sendText("Alright. Connection closing...");
-                    try {
-                        client.close();
-                    } catch (IOException e) {
-                        System.err.println("Couldnt close Connection");
-                        e.printStackTrace();
-                    }
-                    user.setOnline(false);
+                    disconnect();
+                    break;
                 }
-                default -> System.err.println("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
+                default: System.err.println("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
             }
         } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
 
@@ -61,78 +68,20 @@ public class ClientHandler extends Thread {
                         orderHandling(message);
                     }
                 } catch (IOException | ClassNotFoundException e) {
-                    System.err.println("[CLIENTHANDLER] Faulty Instream");
-                    try {
-                        client.close();
-                    } catch (IOException ioException) {
-                        System.err.println("[CLIENTHANDLER] Couldnt close client connection.");
-                    }
+                    System.err.println("[SERVER] [CLIENTHANDLER] "+ this.getId() + " " + user.getName()+"'s InputStream is faulty.");
+                    disconnect();
                     break;
                 }
             }
         }
     }
 
-
-
-    public ClientHandler(Socket client, Server server){
-        this.client = client;
-        this.server = server;
-        try {
-            this.msgOut = new ObjectOutputStream(client.getOutputStream());
-            this.msgIn = new ObjectInputStream(client.getInputStream());
-        } catch (IOException e) {
-            msgIn = null;
-            msgOut = null;
-        }
-
-    }
-    private String receiveText(){
-        try {
-            return ((Message)msgIn.readObject()).getContent();
-        } catch (IOException | ClassNotFoundException | NullPointerException e) {
-            System.out.println("[CLIENTHANDLER] " + client.getInetAddress() + ": Couldnt receive Text");
-            user.setOnline(false);
-            try {
-                client.close();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-            return "";
-        }
-    }
-    private void sendText(String text){
-        Message message = new Message("[SERVER]", text, 1);
-        try {
-            msgOut.writeObject(message);
-        } catch (IOException | NullPointerException e) {
-            System.out.println("[CLIENTHANDLER]"+ client.getInetAddress() + ": Couldnt send message" + message);
-            user.setOnline(false);
-            try {
-                client.close();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
-    }
-    private void sendMessage(Message message){
-        try {
-            msgOut.writeObject(message);
-        } catch (IOException e) {
-            System.err.println("[CLIENTHANDLER] "+ client.getInetAddress() + " failed to send Message" + message.toString());
-            user.setOnline(false);
-            try {
-                client.close();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
-    }
-
+    //Login Dialogue
     private void login(){
         String username;
         String password;
         boolean loginSuccess = false;
+        boolean correctPW = false;
 
         while(!loginSuccess) {
             sendText("Type in your Username please. If it is unknown, you will receive a new account.");
@@ -140,44 +89,115 @@ public class ClientHandler extends Thread {
             sendText("Type in your password.");
             password = receiveText();
             user = new User(username, password, client);
-            if(server.getUsers().contains(user)){
-                sendText("Username is taken, and not with that password.");
+            // User of that name is already registered.
+            if(server.getUsers().containsKey(username)) {
+                if (server.getUsers().get(username).hasPassword(password)) {
+                    sendText("Login Successful.");
+                    loginSuccess = true;
+                } else {
+                    sendText("The Username is TAKEN!");
+                }
+            //Username is unknown
             } else {
-                user.setOnline(true);
-                server.getUsers().add(user);
+                server.getUsers().put(username, user);
                 loginSuccess = true;
-                sendText("Login Successful. You are now online.\n" + "Users Online:\n"+server.onlineUserString());
+                sendText("Registration Successful.");
             }
         }
+        //Login successful
+        user.setOnline(true);
         for(Room i : server.getRooms()){
             i.addMessage(new Message("[SERVER]", user.getName() + " just came online", i.getId()));
         }
+        sendText("Users online:\n" + onlineUserString());
 
 
+    }
+
+    //Chat Dialogue
+    private void chatService(){
+        int messageAmount = server.getRooms().get(0).size();
+        inputHandler.start();
+        while (!client.isClosed()){
+            for(int i = messageAmount; messageAmount < server.getRooms().get(0).size(); i++){
+                sendMessage(server.getRooms().get(0).getMessage(i));
+                messageAmount ++;
+            }
+        }
+        //End of Connection has to be triggered in some interaction process, preferrably orderhandler
+    }
+    //NO Methods that use this one can be called in here.
+    private void disconnect(){
+        System.out.println("[SERVER] [CLIENTHANDLER] "+ this.getId() + " Disconnecting User "+user.getName());
+        user.setOnline(false);
+        inputHandler.interrupt();
+        try {
+            client.close();
+        } catch (IOException e) {
+            System.err.println("[SERVER] [CLIENTHANDLER]" + this.getId() + " Issue while closing connection to "+ user.getName());
+            e.printStackTrace();
+        }
+        System.out.println(("[SERVER] [CLIENTHANDLER]" + this.getId()) + " User" + user.getName() + " was logged out. Posting notice in the Chatrooms...");
+        for (Room i : server.getRooms()){
+            i.addMessage(new Message("[SERVER]", user.getName() + " went offline", i.getId()));
+        }
     }
 
     @Override
     public void run() {
         //Login
         login();
+        chatService();
+    }
 
-        //Test Block Interaction
-        int messageAmount = server.getRooms().get(0).size();
-        InputHandler inputHandler = new InputHandler();
-        inputHandler.start();
-        while (!client.isClosed()){
-                for(int i = messageAmount; messageAmount < server.getRooms().get(0).size(); i++){
-                    sendMessage(server.getRooms().get(0).getMessage(i));
-                    messageAmount ++;
-                }
+
+    //Helper Methods
+    private String onlineUserString(){
+        String result = "";
+        for(User i : server.getUsers().values()){
+            if (i.isOnline()){
+                result += i.getName() + "\n";
+            }
         }
-        //End of Connection has to be triggered in some interaction process, preferrably orderhandler
-
-        for (Room i : server.getRooms()){
-            i.addMessage(new Message("[SERVER]", user.getName() + " went offline", i.getId()));
+        if(result.length() == 0){
+            result += "None";
         }
+        return result;
+    }
+
+    private String receiveText(){
+        try {
+            return ((Message)msgIn.readObject()).getContent();
+        } catch (IOException | ClassNotFoundException | NullPointerException e) {
+            System.out.println("[SERVER] [CLIENTHANDLER] "+ this.getId() + " Couldn't receive Message from " + user.getName());
+            disconnect();
+            return "";
+        }
+    }
+
+    private void sendText(String text){
+        Message message = new Message("[SERVER]", text, 1);
+        try {
+            msgOut.writeObject(message);
+        } catch (IOException | NullPointerException e) {
+            System.out.println("[SERVER] [CLIENTHANDLER] "+ this.getId() + " Couldn't deliver Message to " + user.getName());
+            disconnect();
+        }
+    }
+
+    private void sendMessage(Message message){
+        try {
+            msgOut.writeObject(message);
+        } catch (IOException e) {
+            System.err.println("[SERVER] [CLIENTHANDLER] "+ this.getId() + " Couldn't deliver Message" + message.toString() + " to " + user.getName());
+            disconnect();
+        }
+    }
 
 
+    //Getters and Setters
+    public Socket getClient() {
+        return client;
     }
 }
 

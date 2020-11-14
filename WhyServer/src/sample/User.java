@@ -47,6 +47,10 @@ public class User {
         this.password = password;
     }
 
+    public boolean hasPassword(String pw){
+        return password.equals(pw);
+    }
+
 
     @Override
     public boolean equals(Object obj) {
