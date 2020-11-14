@@ -94,6 +94,7 @@ public class ClientHandler extends Thread {
                 if (server.getUsers().get(username).hasPassword(password)) {
                     sendText("Login Successful.");
                     loginSuccess = true;
+                    user = server.getUsers().get(username);
                 } else {
                     sendText("The Username is TAKEN!");
                 }
@@ -119,7 +120,8 @@ public class ClientHandler extends Thread {
         int messageAmount = server.getRooms().get(0).size();
         inputHandler.start();
         while (!client.isClosed()){
-            for(int i = messageAmount; messageAmount < server.getRooms().get(0).size(); i++){
+            //EXTRA CAUTION IN FOR LOOP: If sendmessage fails, it extends the chat by 1 through attempting to disconnect
+            for(int i = messageAmount; messageAmount < server.getRooms().get(0).size() && client.isConnected(); i++){
                 sendMessage(server.getRooms().get(0).getMessage(i));
                 messageAmount ++;
             }
