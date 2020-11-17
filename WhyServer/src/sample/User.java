@@ -1,6 +1,6 @@
 package sample;
 
-import java.net.*;
+import java.net.Socket;
 
 public class User {
     private Socket socket;
@@ -13,7 +13,8 @@ public class User {
         online = false;
         this.socket = socket;
     }
-    public User(String name, String password, Socket socket){
+
+    public User(String name, String password, Socket socket) {
         this.name = name;
         this.password = password;
         this.socket = socket;
@@ -47,7 +48,7 @@ public class User {
         this.password = password;
     }
 
-    public boolean hasPassword(String pw){
+    public boolean hasPassword(String pw) {
         return password.equals(pw);
     }
 

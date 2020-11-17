@@ -14,6 +14,10 @@ public class Main /*extends Application*/ {
     public static void main(String[] args) {
         //launch(args);
         Server myServer = new Server(1969);
-        myServer.clientSearch();
+        myServer.start();
+        OrderService orderService = new StreamOrderService(myServer);
+        while (!orderService.closeSignal) {
+            orderService.giveOrder();
+        }
     }
 }
