@@ -15,9 +15,9 @@ public class Main /*extends Application*/ {
         //launch(args);
         Server myServer = new Server(1969);
         myServer.start();
-        OrderService orderService = new StreamOrderService(myServer);
-        while (!orderService.closeSignal) {
-            orderService.giveOrder();
+        OrderService orderService = new ConsoleServerController(myServer);
+        while (!orderService.closeSignal()) {
+            orderService.instruct();
         }
     }
 }

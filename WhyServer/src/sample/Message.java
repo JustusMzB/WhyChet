@@ -23,7 +23,7 @@ public class Message implements Serializable {
     }
 
     public String displayString() {
-        return sender + "; " + timeOfDeparture + "\n" + content;
+        return timeOfDeparture + " " + sender  + ":\n" + content;
     }
 
     public String getSender() {

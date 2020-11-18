@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class ClientHandler extends Thread {
+public class ClientHandler extends Terminateable {
 
     private final Socket client;
     private final Server server;
@@ -16,6 +16,7 @@ public class ClientHandler extends Thread {
     private User user;
     private ObjectOutputStream msgOut;
     private ObjectInputStream msgIn;
+    private AtomicBoolean running = new AtomicBoolean(false);
 
     //Constructor
     public ClientHandler(Socket client, Server server) {
@@ -30,6 +31,7 @@ public class ClientHandler extends Thread {
         }
         this.inputHandler = new InputHandler();
         log = server.logType();
+        user = new User("Uninitialized", "Uninitialized", client, server);
 
     }
 
@@ -38,46 +40,59 @@ public class ClientHandler extends Thread {
         String username;
         String password;
         boolean loginSuccess = false;
-        boolean correctPW = false;
 
         while (!loginSuccess) {
-            sendText("Type in your Username please. If it is unknown, you will receive a new account.");
-            username = receiveText();
-            sendText("Type in your password.");
-            password = receiveText();
-            user = new User(username, password, client);
-            // User of that name is already registered.
-            if (server.getUsers().containsKey(username)) {
-                if (server.getUsers().get(username).hasPassword(password)) {
-                    sendText("Login Successful.");
-                    loginSuccess = true;
-                    user = server.getUsers().get(username);
+            try {
+                sendText("Type in your Username please. If it is unknown, you will receive a new account.");
+                username = receiveText();
+                sendText("Type in your password.");
+                password = receiveText();
+                user = new User(username, password, client, server);
+                // User whose name is already registered.
+                if (server.getUsers().containsKey(username)) {
+                    if (server.getUsers().get(username).isOnline()) {
+                        sendText("The User is already logged in");
+                    } else if (server.getUsers().get(username).hasPassword(password)) {
+                        sendText("Login Successful.");
+                        loginSuccess = true;
+                        user = server.getUsers().get(username);
+                    } else {
+                        sendText("The Username is TAKEN!");
+                    }
+                    //Username is unknown
                 } else {
-                    sendText("The Username is TAKEN!");
+                    server.getUsers().put(username, user);
+                    loginSuccess = true;
+                    sendText("Registration Successful.");
                 }
-                //Username is unknown
-            } else {
-                server.getUsers().put(username, user);
-                loginSuccess = true;
-                sendText("Registration Successful.");
+
+                //Login successful
+                user.logOn(this);
+            }catch (IOException | NullPointerException | ClassNotFoundException e) {
+                log.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
+                e.printStackTrace();
+                terminate();
+                break;
             }
         }
-        //Login successful
-        user.setOnline(true);
-        for (Room i : server.getRooms()) {
-            i.addMessage(new Message("[SERVER]", user.getName() + " just came online", i.getId()));
-        }
-        sendText("Users online:\n" + onlineUserString());
+
     }
 
     //Chat Dialogue
     private void chatService() {
         int messageAmount = server.getRooms().get(0).size();
         inputHandler.start();
-        while (!client.isClosed()) {
+        while (running.get()) {
             //EXTRA CAUTION IN FOR LOOP: If sendmessage fails, it extends the chat by 1 through attempting to disconnect
             for (int i = messageAmount; messageAmount < server.getRooms().get(0).size() && client.isConnected(); i++) {
-                sendMessage(server.getRooms().get(0).getMessage(i));
+                try {
+                    sendMessage(server.getRooms().get(0).getMessage(i));
+                } catch (IOException e) {
+                    log.errLog("[CLIENTHANDLER] " + client + user.getName() + " Failed to update its Chat");
+                    e.printStackTrace();
+                    running.set(false);
+                    break;
+                }
                 messageAmount++;
             }
         }
@@ -85,24 +100,21 @@ public class ClientHandler extends Thread {
     }
 
     //NO Methods that use this one can be called in here.
-    public void disconnect() {
-        log.log("[SERVER] [CLIENTHANDLER] " + this.getId() + " Disconnecting User " + user.getName());
-        user.setOnline(false);
-        inputHandler.terminate();
+    public void terminate() {
+        log.log("[SERVER] [CLIENTHANDLER] " + client + " Terminating Clienthandler for " + user.getName());
+        running.set(false);
         try {
             client.close();
         } catch (IOException e) {
             log.errLog("[SERVER] [CLIENTHANDLER]" + this.getId() + " Issue while closing connection to " + user.getName());
             e.printStackTrace();
         }
-        log.log(("[SERVER] [CLIENTHANDLER]" + this.getId()) + " User" + user.getName() + " was logged out. Posting notice in the Chatrooms...");
-        for (Room i : server.getRooms()) {
-            i.addMessage(new Message("[SERVER]", user.getName() + " went offline", i.getId()));
-        }
+        log.log(("[SERVER] [CLIENTHANDLER]" + this.getId()) + " Client of " + user.getName() + " was disconnected. Clienthandler will close.");
     }
 
     @Override
     public void run() {
+        running.set(true);
         //Login
         login();
         chatService();
@@ -122,33 +134,18 @@ public class ClientHandler extends Thread {
         return result;
     }
 
-    private String receiveText() {
-        try {
+    private String receiveText() throws IOException, ClassNotFoundException {
+
             return ((Message) msgIn.readObject()).getContent();
-        } catch (IOException | ClassNotFoundException | NullPointerException e) {
-            log.log("[SERVER] [CLIENTHANDLER] " + this.getId() + " Couldn't receive Message from " + user.getName());
-            disconnect();
-            return "";
-        }
     }
 
-    private void sendText(String text) {
+    public void sendText(String text) throws IOException {
         Message message = new Message("[SERVER]", text, 1);
-        try {
             msgOut.writeObject(message);
-        } catch (IOException | NullPointerException e) {
-            log.log("[SERVER] [CLIENTHANDLER] " + this.getId() + " Couldn't deliver Message to " + user.getName());
-            disconnect();
-        }
     }
 
-    private void sendMessage(Message message) {
-        try {
+    private void sendMessage(Message message) throws IOException {
             msgOut.writeObject(message);
-        } catch (IOException e) {
-            log.errLog("[SERVER] [CLIENTHANDLER] " + this.getId() + " Couldn't deliver Message" + message.toString() + " to " + user.getName());
-            disconnect();
-        }
     }
 
     //Getters and Setters
@@ -162,14 +159,18 @@ public class ClientHandler extends Thread {
 
     //Internal Helper Thread
     private class InputHandler extends Thread {
-        private final AtomicBoolean running = new AtomicBoolean(false);
 
         private void orderHandling(Message order) {
             log.log("[CLIENTHANDLER]" + user.getName() + " Received an order");
             switch ((int) order.getRoomID()) {
                 case 1: {
-                    sendText("Alright. Connection closing...");
-                    disconnect();
+                    try {
+                        sendText("Alright. Connection closing...");
+                    } catch (IOException e) {
+                        log.errLog("[CLIENTHANDLER] "+ client + " "+ user.getName() + " Connection error during user-induced Logout");
+                        e.printStackTrace();
+                    }
+                    terminate();
                     break;
                 }
                 default:
@@ -178,7 +179,8 @@ public class ClientHandler extends Thread {
         } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
 
         private void messageHandler(Message message) {
-            log.log("[CLIENTHANDLER]" + user.getName() + " Received a Message");
+            log.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message");
+            message = new Message(user.getName(),message.getContent(),message.getRoomID());
             Room myRoom;
             int index = 0;
             do {
@@ -190,9 +192,7 @@ public class ClientHandler extends Thread {
 
         @Override
         public void run() {
-            running.set(true);
             while (running.get()) {
-
                 try {
                     Message message = (Message) (msgIn.readObject());
                     if (message.getRoomID() > 0) {
@@ -201,17 +201,15 @@ public class ClientHandler extends Thread {
                         orderHandling(message);
                     }
                 } catch (IOException | ClassNotFoundException e) {
-                    if (running.get()) {
+                    if (running.get()) { // checking wether intentional termination was demanded
                         log.errLog("[SERVER] [CLIENTHANDLER] " + this.getId() + " " + user.getName() + "'s InputStream is faulty.");
-                        disconnect();
+                        user.logOff();
+                    } else {
+                        terminate();
                     }
                     break;
                 }
             }
-        }
-
-        public void terminate() {
-            running.set(false);
         }
     }
 }
