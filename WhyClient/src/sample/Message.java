@@ -1,36 +1,40 @@
 package sample;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 
 public class Message implements Serializable {
-    private String sender;
-    private String content;
-    private long roomID;
-    Date date;
-    String timeOfDeparture;
+    private final String sender;
+    private final LocalDateTime timeOfDeparture;
+    private final String content;
+    private final long roomID;
 
-    public Message(String sender, String content, long roomID){
+
+    public Message(String sender, String content, long roomID) {
         this.sender = sender;
         this.content = content;
-        this.date = new Date();
         this.roomID = roomID;
-        this.timeOfDeparture = (new Anzeige(date).getUhrzeit());
+        timeOfDeparture = LocalDateTime.now();
     }
 
-    public String toString(){
-        return sender +"\n" + content + "\n Time: " + timeOfDeparture + "\n ID: " + roomID;
+    @Override
+    public String toString() {
+        return "sender: " + sender + "\n content:" + content + "\n Time: " + timeOfDeparture + "\n ID: " + roomID;
     }
 
-    public String displayString(){
-        return sender + "; " + timeOfDeparture +"\n" + content;
+    public String displayString() {
+        String dT= timeOfDeparture.toString();
+        //TODO: implement serializable class, since this is rather ugly
+        return "["+sender + "; " + dT.substring(8,10)+"."+dT.substring(5,7)+"."+dT.substring(0,4)+" "+dT.substring(11,19)+"]" + "\n" + content;
     }
 
     public String getSender() {
         return sender;
     }
 
-    public String getTimeOfDeparture() {
+    public LocalDateTime getTimeOfDeparture() {
         return timeOfDeparture;
     }
 

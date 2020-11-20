@@ -139,6 +139,9 @@ public class ClientHandler extends Thread {
             username = receiveText();
             sendText("Type in your password.");
             password = receiveText();
+
+            //TODO: check for both, not to be commands. on client side?
+
             user = new User(username, password, client);
             if(server.getUsers().contains(user)){
                 sendText("Username is taken, and not with that password.");
