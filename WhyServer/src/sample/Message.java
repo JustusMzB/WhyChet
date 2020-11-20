@@ -1,36 +1,40 @@
 package sample;
 
 import java.io.Serializable;
-/* TO DO
- *Timestamp Implementation
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
- */
 
 public class Message implements Serializable {
     private final String sender;
-    private final long timeOfDeparture = 0;
+    private final LocalDateTime timeOfDeparture;
     private final String content;
     private final long roomID;
+
 
     public Message(String sender, String content, long roomID) {
         this.sender = sender;
         this.content = content;
         this.roomID = roomID;
+        timeOfDeparture = LocalDateTime.now();
     }
 
+    @Override
     public String toString() {
-        return sender + "\n" + content + "\n Time: " + timeOfDeparture + "\n ID: " + roomID;
+        return "sender: " + sender + "\n content:" + content + "\n Time: " + timeOfDeparture + "\n ID: " + roomID;
     }
 
     public String displayString() {
-        return timeOfDeparture + " " + sender  + ":\n" + content;
+        String dT= timeOfDeparture.toString();
+        //TODO: implement serializable class, since this is rather ugly
+        return "["+sender + "; " + dT.substring(8,10)+"."+dT.substring(5,7)+"."+dT.substring(0,4)+" "+dT.substring(11,19)+"]" + "\n" + content;
     }
 
     public String getSender() {
         return sender;
     }
 
-    public long getTimeOfDeparture() {
+    public LocalDateTime getTimeOfDeparture() {
         return timeOfDeparture;
     }
 
