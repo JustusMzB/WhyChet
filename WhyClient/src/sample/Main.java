@@ -56,6 +56,9 @@ public class Main /*extends Application*/ {
                 nextLine = keyboard.nextLine();
                 System.out.println("Received Keyboard input: " + nextLine);
                 roomID = isOrder(nextLine);
+                if(nextLine.equalsIgnoreCase("")){
+                    continue;
+                }
                 try {
                     message = new Message(username, nextLine, roomID);
                     msgServer.writeObject(message);
