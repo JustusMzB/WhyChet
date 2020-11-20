@@ -30,7 +30,7 @@ public class Main /*extends Application*/ {
 
         try {
             System.out.println("Looking for Server ....");
-            Socket server = new Socket("localhost", 3969);
+            Socket server = new Socket("localhost", 1969);
             System.out.println("Connected to server." + server.getLocalAddress() + " "+ server.getLocalPort());
             ObjectOutputStream msgServer = new ObjectOutputStream(server.getOutputStream());
 
