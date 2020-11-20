@@ -50,6 +50,7 @@ public class ClientHandler extends Terminateable {
                 user = new User(username, password, client, server);
                 // User whose name is already registered.
                 if (server.getUsers().containsKey(username)) {
+                    //Username is taken
                     if (server.getUsers().get(username).isOnline()) {
                         sendText("The User is already logged in");
                     } else if (server.getUsers().get(username).hasPassword(password)) {
@@ -68,6 +69,7 @@ public class ClientHandler extends Terminateable {
 
                 //Login successful
                 user.logOn(this);
+                sendText(onlineUserString());
             }catch (IOException | NullPointerException | ClassNotFoundException e) {
                 log.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
                 e.printStackTrace();
