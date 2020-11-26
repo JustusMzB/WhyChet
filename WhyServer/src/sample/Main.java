@@ -15,7 +15,7 @@ public class Main /*extends Application*/ {
         //launch(args);
         Server myServer = new Server(1969);
         myServer.start();
-        OrderService orderService = new ConsoleServerController(myServer);
+        ServerOrderService orderService = new ConsoleServerController(myServer);
         while (!orderService.closeSignal()) {
             orderService.instruct();
         }

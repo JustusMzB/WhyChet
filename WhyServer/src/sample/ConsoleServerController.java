@@ -3,7 +3,7 @@ package sample;
 import java.io.InputStream;
 import java.util.Scanner;
 
-public class ConsoleServerController extends OrderService {
+public class ConsoleServerController extends ServerOrderService {
     private final Scanner in;
     private boolean closeSignal;
     private Server target;
@@ -19,18 +19,6 @@ public class ConsoleServerController extends OrderService {
         in = new Scanner(is);
     }
 
-    public void giveOrder(Message order){
-        switch ((int) order.getRoomID()) {
-            case -1:
-                target.disconnectUser(order.getContent());
-                break;
-            case -2:
-                target.terminate();
-                break;
-            default:
-                target.logType().log("[SERVER] Received unknown order");
-        }
-    }
     @Override
     public void instruct() {
         String entry = in.nextLine();
