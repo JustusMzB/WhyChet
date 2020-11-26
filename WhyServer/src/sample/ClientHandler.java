@@ -73,8 +73,6 @@ public class ClientHandler extends Thread {
         }
     }
 
-
-
     public ClientHandler(Socket client, Server server){
         this.client = client;
         this.server = server;
@@ -85,7 +83,6 @@ public class ClientHandler extends Thread {
             msgIn = null;
             msgOut = null;
         }
-
     }
     private String receiveText(){
         try {
@@ -155,8 +152,6 @@ public class ClientHandler extends Thread {
         for(Room i : server.getRooms()){
             i.addMessage(new Message("[SERVER]", user.getName() + " just came online", i.getId()));
         }
-
-
     }
 
     @Override

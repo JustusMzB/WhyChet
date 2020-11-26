@@ -7,9 +7,11 @@ import java.net.Socket;
 public class Listener extends Thread {
     private ObjectInputStream observedStream;
     private boolean connected;
+    private Socket server;
 
     public Listener(Socket server){
         try {
+            this.server = server;
             System.out.println("[LISTENER CONSTRUCTION] Trying to connect to Objectstream ...");
             observedStream = new ObjectInputStream(server.getInputStream());
             System.out.println("[LISTENER CONSTRUCTION] Listener constructed successfully.");
@@ -28,7 +30,7 @@ public class Listener extends Thread {
             try {
                 if(observedStream.available() >= 0) {
                     newMessage = (Message) observedStream.readObject();
-                    System.out.println(newMessage.displayString());
+                    executeOrder(newMessage); // execute Order taken from server
                 }
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Server Stream is Faulty. Closing connection.");
@@ -36,6 +38,23 @@ public class Listener extends Thread {
                 connected = false;
                 break;
             }
+        }
+    }
+
+    //adjust action to given roomID of message-object
+    private void executeOrder(Message message){
+        long id = message.getRoomID();
+        if(id==1)
+            System.out.println(message.displayString());
+        else if(id == -1){
+            try {
+                server.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else{
+            System.out.println(" ID unknown. Shutting down.");
         }
     }
 

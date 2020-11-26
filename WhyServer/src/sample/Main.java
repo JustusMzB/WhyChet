@@ -19,7 +19,7 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         //launch(args);
-        Server myServer = new Server(3969);
+        Server myServer = new Server(1969);
         myServer.clientListener();
     }
 }
