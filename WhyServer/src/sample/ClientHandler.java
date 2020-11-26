@@ -4,76 +4,22 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class ClientHandler extends Thread {
+public class ClientHandler extends Terminateable {
 
-    private Socket client;
-    private Server server;
+    private final Socket client;
+    private final Server server;
+    private final InputHandler inputHandler;
+    private final LogService log;
     private User user;
     private ObjectOutputStream msgOut;
     private ObjectInputStream msgIn;
+    private AtomicBoolean running = new AtomicBoolean(false);
 
-
-    public Socket getClient() {
-        return client;
-    }
-
-    private class InputHandler extends Thread{
-
-        private void orderHandling(Message order){
-            System.out.println("[CLIENTHANDLER]" + user.getName() + " Received an order");
-            switch ((int) order.getRoomID()) {
-                case -1 -> {
-                    sendText("Alright. Connection closing...");
-                    try {
-                        client.close();
-                    } catch (IOException e) {
-                        System.err.println("Couldnt close Connection");
-                        e.printStackTrace();
-                    }
-                    user.setOnline(false);
-                }
-                default -> System.err.println("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
-            }
-        } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
-
-        private void messageHandler(Message message){
-            System.out.println("[CLIENTHANDLER]" + user.getName() + " Received a Message");
-            Room myRoom;
-            int index = 0;
-            do {
-                myRoom = server.getRooms().get(index);
-                index++;
-            } while (index < server.getRooms().size() &&  myRoom.getId() != message.getRoomID());
-            myRoom.addMessage(message);
-        }
-
-        @Override
-        public void run() {
-            while (true){
-
-                try {
-                    Message message = (Message)(msgIn.readObject());
-                    if(message.getRoomID() > 0) {
-                        messageHandler(message);
-                    } else {
-                        orderHandling(message);
-                    }
-                } catch (IOException | ClassNotFoundException e) {
-                    System.err.println("[CLIENTHANDLER] Faulty Instream");
-                    try {
-                        client.close();
-                    } catch (IOException ioException) {
-                        System.err.println("[CLIENTHANDLER] Couldnt close client connection.");
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    public ClientHandler(Socket client, Server server){
+    //Constructor
+    public ClientHandler(Socket client, Server server) {
         this.client = client;
         this.server = server;
         try {
@@ -83,105 +29,189 @@ public class ClientHandler extends Thread {
             msgIn = null;
             msgOut = null;
         }
-    }
-    private String receiveText(){
-        try {
-            return ((Message)msgIn.readObject()).getContent();
-        } catch (IOException | ClassNotFoundException | NullPointerException e) {
-            System.out.println("[CLIENTHANDLER] " + client.getInetAddress() + ": Couldnt receive Text");
-            user.setOnline(false);
-            try {
-                client.close();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-            return "";
-        }
-    }
-    private void sendText(String text){
-        Message message = new Message("[SERVER]", text, 1);
-        try {
-            msgOut.writeObject(message);
-        } catch (IOException | NullPointerException e) {
-            System.out.println("[CLIENTHANDLER]"+ client.getInetAddress() + ": Couldnt send message" + message);
-            user.setOnline(false);
-            try {
-                client.close();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
-    }
-    private void sendMessage(Message message){
-        try {
-            msgOut.writeObject(message);
-        } catch (IOException e) {
-            System.err.println("[CLIENTHANDLER] "+ client.getInetAddress() + " failed to send Message" + message.toString());
-            user.setOnline(false);
-            try {
-                client.close();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
+        this.inputHandler = new InputHandler();
+        log = server.logType();
+        user = new User("Uninitialized", "Uninitialized", client, server);
+
     }
 
-    private void login(){
+    //Login Dialogue
+    private void login() {
         String username;
         String password;
         boolean loginSuccess = false;
 
-        while(!loginSuccess) {
-            sendText("Type in your Username please. If it is unknown, you will receive a new account.");
-            username = receiveText();
-            sendText("Type in your password.");
-            password = receiveText();
+        while (!loginSuccess) {
+            try {
+                sendText("Type in your Username please. If it is unknown, you will receive a new account.");
+                username = receiveText();
+                sendText("Type in your password.");
+                password = receiveText();
+                user = new User(username, password, client, server);
+                // User whose name is already registered.
+                if (server.getUsers().containsKey(username)) {
+                    //Username is taken
+                    if (server.getUsers().get(username).isOnline()) {
+                        sendText("The User is already logged in");
+                    } else if (server.getUsers().get(username).hasPassword(password)) {
+                        sendText("Login Successful.");
+                        loginSuccess = true;
+                        user = server.getUsers().get(username);
+                    } else {
+                        sendText("The Username is TAKEN!");
+                    }
+                    //Username is unknown
+                } else {
+                    server.getUsers().put(username, user);
+                    loginSuccess = true;
+                    sendText("Registration Successful.");
+                }
 
-            //TODO: check for both, not to be commands. on client side?
-
-            user = new User(username, password, client);
-            if(server.getUsers().contains(user)){
-                sendText("Username is taken, and not with that password.");
-            } else {
-                user.setOnline(true);
-                server.getUsers().add(user);
-                loginSuccess = true;
-                sendText("Login Successful. You are now online.\n" + "Users Online:\n"+server.onlineUserString());
+                //Login successful
+                user.logOn(this);
+                sendText(onlineUserString());
+            }catch (IOException | NullPointerException | ClassNotFoundException e) {
+                log.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
+                e.printStackTrace();
+                terminate();
+                break;
             }
         }
-        for(Room i : server.getRooms()){
-            i.addMessage(new Message("[SERVER]", user.getName() + " just came online", i.getId()));
+
+    }
+
+    //Chat Dialogue
+    private void chatService() {
+        int messageAmount = server.getRooms().get(0).size();
+        inputHandler.start();
+        while (running.get()) {
+            //EXTRA CAUTION IN FOR LOOP: If sendmessage fails, it extends the chat by 1 through attempting to disconnect
+            for (int i = messageAmount; messageAmount < server.getRooms().get(0).size() && client.isConnected(); i++) {
+                try {
+                    sendMessage(server.getRooms().get(0).getMessage(i));
+                } catch (IOException e) {
+                    log.errLog("[CLIENTHANDLER] " + client + user.getName() + " Failed to update its Chat");
+                    e.printStackTrace();
+                    running.set(false);
+                    break;
+                }
+                messageAmount++;
+            }
         }
+        //End of Connection has to be triggered in some interaction process, preferrably orderhandler
+    }
+
+    //NO Methods that use this one can be called in here.
+    public void terminate() {
+        log.log("[SERVER] [CLIENTHANDLER] " + client + " Terminating Clienthandler for " + user.getName());
+        running.set(false);
+        try {
+            client.close();
+        } catch (IOException e) {
+            log.errLog("[SERVER] [CLIENTHANDLER]" + this.getId() + " Issue while closing connection to " + user.getName());
+            e.printStackTrace();
+        }
+        log.log(("[SERVER] [CLIENTHANDLER]" + this.getId()) + " Client of " + user.getName() + " was disconnected. Clienthandler will close.");
     }
 
     @Override
     public void run() {
+        running.set(true);
         //Login
         login();
+        chatService();
+    }
 
-        //Test Block Interaction
-        int messageAmount = server.getRooms().get(0).size();
-        InputHandler inputHandler = new InputHandler();
-        inputHandler.start();
-        while (!client.isClosed()){
-                for(int i = messageAmount; messageAmount < server.getRooms().get(0).size(); i++){
-                    sendMessage(server.getRooms().get(0).getMessage(i));
-                    messageAmount ++;
+    //Helper Methods
+    private String onlineUserString() {
+        String result = "";
+        for (User i : server.getUsers().values()) {
+            if (i.isOnline()) {
+                result += i.getName() + "\n";
+            }
+        }
+        if (result.length() == 0) {
+            result += "None";
+        }
+        return result;
+    }
+
+    private String receiveText() throws IOException, ClassNotFoundException {
+
+            return ((Message) msgIn.readObject()).getContent();
+    }
+
+    public void sendText(String text) throws IOException {
+        Message message = new Message("[SERVER]", text, 1);
+            msgOut.writeObject(message);
+    }
+
+    private void sendMessage(Message message) throws IOException {
+            msgOut.writeObject(message);
+    }
+
+    //Getters and Setters
+    public Socket getClient() {
+        return client;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    //Internal Helper Thread
+    private class InputHandler extends Thread {
+
+        private void orderHandling(Message order) {
+            log.log("[CLIENTHANDLER]" + user.getName() + " Received an order");
+            switch ((int) order.getRoomID()) {
+                case 1: {
+                    try {
+                        sendText("Alright. Connection closing...");
+                    } catch (IOException e) {
+                        log.errLog("[CLIENTHANDLER] "+ client + " "+ user.getName() + " Connection error during user-induced Logout");
+                        e.printStackTrace();
+                    }
+                    terminate();
+                    break;
                 }
+                default:
+                    log.errLog("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
+            }
+        } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
+
+        private void messageHandler(Message message) {
+            log.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message");
+            message = new Message(user.getName(),message.getContent(),message.getRoomID());
+            Room myRoom;
+            int index = 0;
+            do {
+                myRoom = server.getRooms().get(index);
+                index++;
+            } while (index < server.getRooms().size() && myRoom.getId() != message.getRoomID());
+            myRoom.addMessage(message);
         }
-        //End of Connection has to be triggered in some interaction process, preferrably orderhandler
 
-        for (Room i : server.getRooms()){
-            i.addMessage(new Message("[SERVER]", user.getName() + " went offline", i.getId()));
+        @Override
+        public void run() {
+            while (running.get()) {
+                try {
+                    Message message = (Message) (msgIn.readObject());
+                    if (message.getRoomID() > 0) {
+                        messageHandler(message);
+                    } else {
+                        orderHandling(message);
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    if (running.get()) { // checking wether intentional termination was demanded
+                        log.errLog("[SERVER] [CLIENTHANDLER] " + this.getId() + " " + user.getName() + "'s InputStream is faulty.");
+                        user.logOff();
+                    } else {
+                        terminate();
+                    }
+                    break;
+                }
+            }
         }
-
-
     }
 }
-
-/*
-Currently in complete super Alpha.
-TO DO:
-    *Continuous chat dialogue
-    *By Checking for new Messages in Room and sending them to Client
- */

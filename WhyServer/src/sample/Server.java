@@ -1,38 +1,22 @@
 package sample;
 
+import javafx.scene.image.Image;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Server {
-    private ArrayList<ClientHandler> clientHandlers = new ArrayList<ClientHandler>();
-    private List<Room> rooms = Collections.synchronizedList(new LinkedList<Room>());
-    private Set<User> users = Collections.synchronizedSet(new HashSet<User>());
+public class Server extends Terminateable {
+    private final List<Room> rooms = Collections.synchronizedList(new LinkedList<Room>());
+    private final Map<String, User> users = Collections.synchronizedMap(new HashMap<String, User>());
+    private final LogService log = new ConsoleLog();
     private ServerSocket serverSocket;
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
-    private void clientHandlerCleanup(){
-        ArrayList<Integer> deleteHere = new ArrayList<>();
-        for(int i = 0; i < clientHandlers.size(); i++){
-            if(!clientHandlers.get(i).isAlive()){
-                deleteHere.add(i);
-            }
-        }
-        Collections.sort(deleteHere);
-        for(int i = deleteHere.size()-1; i>= 0; i--){
-            clientHandlers.remove(deleteHere.get(i).intValue());
-        }
-    }
+    public Server(int port) {
 
-    public List<Room> getRooms() {
-        return rooms;
-    }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public Server(int port){
         try {
             serverSocket = new ServerSocket(port);
             //serverSocket.setSoTimeout(500000);
@@ -42,40 +26,58 @@ public class Server {
         rooms.add(new Room(1));
     }
 
-    public void clientListener(){
+    public void clientSearch() {
         Socket newClient;
-        while (true){
-            try{
-                System.out.println("[SERVER] Waiting for Client....");
+        while (true) {
+            try {
+                log.log("[SERVER] Waiting for Client....");
                 newClient = serverSocket.accept();
-                clientHandlers.add(new ClientHandler(newClient, this));
-                clientHandlers.get(clientHandlers.size() - 1).start();
-                System.out.println("New Client connected.");
-                clientHandlerCleanup();
+                new ClientHandler(newClient, this).start();
+                log.log("[SERVER] New Client connected.");
             } catch (IOException e) {
-                System.err.println("[SERVER] Connection Error in main Loop / Timeout");
+                log.errLog("[SERVER] Connection Error in main Loop / Timeout");
                 e.printStackTrace();
                 break;
             }
         }
     }
 
-    public String onlineUserString(){
-        String result = "";
-        for(User i : users){
-            if (i.isOnline()){
-                result += i.getName() + "\n";
-            }
+    @Override
+    public void run() {
+        running.set(true);
+        clientSearch();
+    }
+    @Override
+    public void terminate() {
+        for (User i : users.values()){
+            i.logOff();
         }
-        if(result.length() == 0){
-            result += "None";
+        running.set(false);
+    }
+
+    public void disconnectUser(String username) {
+        if (users.containsKey(username)) {
+            users.get(username).logOff();
+        } else {
+            log.log("[SERVER] disconnectUser Failed: Unknown user");
         }
-        return result;
+    }
+
+    public List<Room> getRooms() {
+        return rooms;
+    }
+
+    public Map<String, User> getUsers() {
+        return users;
+    }
+
+    public LogService logType() {
+        return log;
     }
 }
 
 
 /* TO DO
-    *Cleaning Routine of clienthandlers
-    *Message for users on new Login
+ *Cleaning Routine of clienthandlers
+ *Message for users on new Login
  */
