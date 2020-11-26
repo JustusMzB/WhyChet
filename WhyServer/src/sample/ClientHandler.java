@@ -161,17 +161,24 @@ public class ClientHandler extends Terminateable {
 
     //Internal Helper Thread
     private class InputHandler extends Thread {
-        private ServerOrderService clientOrderer = new ServerOrderService(server);
 
         private void orderHandling(Message order) {
-            log.log("[CLIENTHANDLER]" + user.getName() + " sent an Order to the Server");
-            if(order.getRoomID() != -2) {
-                clientOrderer.giveOrder(order);
-            } else {
-                log.log("[CLIENTHANDLER]" + user.getName() + " tried to induce an illegal Order.");
-                user.logOff();
+            log.log("[CLIENTHANDLER]" + user.getName() + " Received an order");
+            switch ((int) order.getRoomID()) {
+                case -1: {
+                    try {
+                        sendText("Alright. Connection closing...");
+                    } catch (IOException e) {
+                        log.errLog("[CLIENTHANDLER] "+ client + " "+ user.getName() + " Connection error during user-induced Logout");
+                        e.printStackTrace();
+                    }
+                    user.logOff();
+                    break;
+                }
+                default:
+                    log.errLog("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
             }
-        }
+        } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
 
         private void messageHandler(Message message) {
             log.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message");
