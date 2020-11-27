@@ -1,7 +1,5 @@
 package sample;
 
-import javafx.scene.image.Image;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -28,16 +26,20 @@ public class Server extends Terminateable {
 
     public void clientSearch() {
         Socket newClient;
-        while (true) {
+        while (running.get()) {
             try {
                 log.log("[SERVER] Waiting for Client....");
                 newClient = serverSocket.accept();
                 new ClientHandler(newClient, this).start();
                 log.log("[SERVER] New Client connected.");
             } catch (IOException e) {
-                log.errLog("[SERVER] Connection Error in main Loop / Timeout");
-                e.printStackTrace();
-                break;
+                if(running.get()) {
+                    log.errLog("[SERVER] Connection Error in main Loop / Timeout");
+                    e.printStackTrace();
+                    break;
+                } else {
+                    log.log("[SERVER] Clientsearch was stopped");
+                }
             }
         }
     }
@@ -53,6 +55,11 @@ public class Server extends Terminateable {
             i.logOff();
         }
         running.set(false);
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void disconnectUser(String username) {

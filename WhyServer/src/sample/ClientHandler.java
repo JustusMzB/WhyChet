@@ -69,7 +69,7 @@ public class ClientHandler extends Terminateable {
 
                 //Login successful
                 user.logOn(this);
-                sendText(onlineUserString());
+                sendText("Users Online:\n" + onlineUserString());
             }catch (IOException | NullPointerException | ClassNotFoundException e) {
                 log.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
                 e.printStackTrace();
