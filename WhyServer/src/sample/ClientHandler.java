@@ -165,7 +165,7 @@ public class ClientHandler extends Terminateable {
         private void orderHandling(Message order) {
             log.log("[CLIENTHANDLER]" + user.getName() + " Received an order");
             switch ((int) order.getRoomID()) {
-                case 1: {
+                case -1: {
                     try {
                         sendText("Alright. Connection closing...");
                     } catch (IOException e) {
