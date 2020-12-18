@@ -1,30 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyClient.ClientMainSceneCtrl">
+<AnchorPane prefHeight="783.0" prefWidth="913.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyClient.ClientMainSceneCtrl">
    <children>
-      <Accordion layoutX="14.0" layoutY="14.0">
-        <panes>
-          <TitledPane animated="false" text="ExampleRoom">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </TitledPane>
-          <TitledPane animated="false" text="untitled 2">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </TitledPane>
-          <TitledPane animated="false" text="untitled 3">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </TitledPane>
-        </panes>
-      </Accordion>
+      <HBox prefHeight="783.0" prefWidth="913.0">
+         <children>
+            <SplitPane dividerPositions="0.5005173305742369" orientation="VERTICAL" prefHeight="775.0" prefWidth="654.0">
+              <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                     <children>
+                        <VBox prefHeight="783.0" prefWidth="664.0">
+                           <children>
+                              <FlowPane prefHeight="77.0" prefWidth="664.0">
+                                 <children>
+                                    <MenuBar prefHeight="26.0" prefWidth="162.0">
+                                      <menus>
+                                        <Menu mnemonicParsing="false" text="File">
+                                          <items>
+                                            <MenuItem mnemonicParsing="false" text="Close" />
+                                          </items>
+                                        </Menu>
+                                        <Menu mnemonicParsing="false" text="Edit">
+                                          <items>
+                                            <MenuItem mnemonicParsing="false" text="Delete" />
+                                          </items>
+                                        </Menu>
+                                        <Menu mnemonicParsing="false" text="Help">
+                                          <items>
+                                            <MenuItem mnemonicParsing="false" text="About" />
+                                          </items>
+                                        </Menu>
+                                      </menus>
+                                    </MenuBar>
+                                 </children>
+                              </FlowPane>
+                              <ScrollPane prefHeight="307.0" prefWidth="652.0">
+                                 <content>
+                                    <Accordion prefHeight="312.0" prefWidth="644.0">
+                                      <panes>
+                                        <TitledPane animated="false" prefHeight="246.0" prefWidth="522.0" text="ExampleRoom1">
+                                          <content>
+                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="337.0" prefWidth="405.0">
+                                                   <children>
+                                                      <ScrollPane prefHeight="334.0" prefWidth="408.0">
+                                                        <content>
+                                                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="332.0" prefWidth="410.0" />
+                                                        </content>
+                                                      </ScrollPane>
+                                                   </children>
+                                                </AnchorPane>
+                                          </content>
+                                        </TitledPane>
+                                          <TitledPane animated="false" text="ExampleRoom2">
+                                             <content>
+                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="337.0" prefWidth="405.0">
+                                                   <children>
+                                                      <ScrollPane prefHeight="334.0" prefWidth="408.0">
+                                                         <content>
+                                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="332.0" prefWidth="404.0" />
+                                                         </content>
+                                                      </ScrollPane>
+                                                   </children>
+                                                </AnchorPane>
+                                             </content>
+                                          </TitledPane>
+                                        <TitledPane animated="false" prefHeight="295.0" prefWidth="535.0" text="untitled 3">
+                                          <content>
+                                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                          </content>
+                                        </TitledPane>
+                                      </panes>
+                                    </Accordion>
+                                 </content>
+                              </ScrollPane>
+                           </children>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                     <children>
+                        <ScrollPane layoutX="12.0" layoutY="14.0" prefHeight="242.0" prefWidth="628.0">
+                           <content>
+                              <TextArea prefHeight="239.0" prefWidth="626.0" />
+                           </content>
+                        </ScrollPane>
+                        <Button layoutX="549.0" layoutY="288.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="75.0" text="Button" />
+                        <TextArea layoutX="31.0" layoutY="272.0" prefHeight="82.0" prefWidth="480.0" />
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </AnchorPane>
+              </items>
+            </SplitPane>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="783.0" prefWidth="258.0">
+               <children>
+                  <TitledPane animated="false" prefHeight="783.0" prefWidth="254.0" text="online users">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                    </content>
+                  </TitledPane>
+               </children>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </AnchorPane>
+         </children>
+      </HBox>
    </children>
 </AnchorPane>
