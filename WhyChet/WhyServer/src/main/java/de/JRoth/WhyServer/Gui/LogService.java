@@ -1,4 +1,4 @@
-package de.JRoth.WhyServer;
+package de.JRoth.WhyServer.Gui;
 
 public interface LogService {
     void log(String logEntry);

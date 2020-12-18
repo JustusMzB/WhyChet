@@ -1,5 +1,8 @@
 package de.JRoth.WhyServer;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 import javax.swing.plaf.multi.MultiSeparatorUI;
 import java.io.IOException;
 import java.net.Socket;
@@ -10,12 +13,11 @@ public class User {
     private String name;
     private String password;
     private ClientHandler handler;
-    private boolean online;
+    private BooleanProperty isOnline = new SimpleBooleanProperty(false);
     private Server server;
 
     //public sample.Room& room;
     public User(Socket socket, Server server) {
-        online = false;
         this.socket = socket;
         this.server =server;
     }
@@ -24,7 +26,6 @@ public class User {
         this.name = name;
         this.password = password;
         this.socket = socket;
-        this.online = false;
         this.server = server;
     }
 
@@ -46,16 +47,12 @@ public class User {
     }
 
     public boolean isOnline() {
-        return online;
-    }
-
-    public void setOnlineStatus(boolean status){
-        online = status;
+        return isOnline.get();
     }
 
     public void logOff(){
-        server.logType().log("[USER] "+ name + " is being logged off");
-        this.online = false;
+        server.DisplayType().log("[USER] "+ name + " is being logged off");
+        isOnline.set(false);
         if(handler != null) {
             handler.terminate();
             this.handler = null;
@@ -73,14 +70,14 @@ public class User {
             try {
                 handler.sendText(s);
             } catch (IOException e) {
-                server.logType().errLog("[USER]" + name + " Couldn't receive Message");
+                server.DisplayType().errLog("[USER]" + name + " Couldn't receive Message");
                 e.printStackTrace();
             }
         }
     }
 
     public void logOn(ClientHandler handler) {
-        online = true;
+        isOnline.set(true);
         this.handler = handler;
         for(User i : server.getUsers().values()){
             if (!i.equals(this)){
@@ -91,6 +88,9 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+    public BooleanProperty getOnlineProperty(){
+        return isOnline;
     }
 
     public boolean hasPassword(String pw) {

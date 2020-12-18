@@ -1,21 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.HBox?>
 
-<HBox>
-    <children>
-        <Label id="Username" text="UserNameTest">
-            <contextMenu>
-                <ContextMenu>
-                    <items>
-                        <MenuItem text="Kick"/>
-                    </items>
-                </ContextMenu>
-            </contextMenu>
-        </Label>
-    </children>
+
+<HBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyServer.Gui.UserView">
+   <children>
+      <Label fx:id="lblUsername" text="username">
+         <contextMenu>
+            <ContextMenu>
+              <items>
+                <MenuItem fx:id="kick" mnemonicParsing="false" text="Kick" onAction="#kick">
+
+          </MenuItem>
+              </items>
+            </ContextMenu>
+         </contextMenu>
+         <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" />
+         </HBox.margin>
+      </Label>
+      <Label text="Online:">
+         <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" />
+         </HBox.margin>
+      </Label>
+      <CheckBox fx:id="chckbxOnline" disable="true" mnemonicParsing="false">
+         <HBox.margin>
+            <Insets bottom="5.0" />
+         </HBox.margin>
+      </CheckBox>
+   </children>
 </HBox>

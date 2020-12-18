@@ -37,7 +37,7 @@ public class ConsoleServerController extends ServerOrderService {
                     closeSignal = true;
                     break;
                 default:
-                    target.logType().log("[ORDERSERVICE] unknown order was issued from console");
+                    target.DisplayType().log("[ORDERSERVICE] unknown order was issued from console");
             }
         }
     }

@@ -9,12 +9,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Server extends Terminateable {
     private final List<Room> rooms = Collections.synchronizedList(new LinkedList<Room>());
     private final Map<String, User> users = Collections.synchronizedMap(new HashMap<String, User>());
-    private final LogService log = new ConsoleLog();
+    private DisplayService displayService;
     private ServerSocket serverSocket;
     private final AtomicBoolean running = new AtomicBoolean(false);
 
-    public Server(int port) {
-
+    public Server(int port, DisplayService displayService) {
+        this.displayService = displayService;
         try {
             serverSocket = new ServerSocket(port);
             //serverSocket.setSoTimeout(500000);
@@ -28,17 +28,17 @@ public class Server extends Terminateable {
         Socket newClient;
         while (running.get()) {
             try {
-                log.log("[SERVER] Waiting for Client....");
+                displayService.log("[SERVER] Waiting for Client....");
                 newClient = serverSocket.accept();
                 new ClientHandler(newClient, this).start();
-                log.log("[SERVER] New Client connected.");
+                displayService.log("[SERVER] New Client connected.");
             } catch (IOException e) {
                 if(running.get()) {
-                    log.errLog("[SERVER] Connection Error in main Loop / Timeout");
+                    displayService.errLog("[SERVER] Connection Error in main Loop / Timeout");
                     e.printStackTrace();
                     break;
                 } else {
-                    log.log("[SERVER] Clientsearch was stopped");
+                    displayService.log("[SERVER] Clientsearch was stopped");
                 }
             }
         }
@@ -66,7 +66,7 @@ public class Server extends Terminateable {
         if (users.containsKey(username)) {
             users.get(username).logOff();
         } else {
-            log.log("[SERVER] disconnectUser Failed: Unknown user");
+            displayService.log("[SERVER] disconnectUser Failed: Unknown user");
         }
     }
 
@@ -78,8 +78,8 @@ public class Server extends Terminateable {
         return users;
     }
 
-    public LogService logType() {
-        return log;
+    public DisplayService DisplayType() {
+        return displayService;
     }
 }
 

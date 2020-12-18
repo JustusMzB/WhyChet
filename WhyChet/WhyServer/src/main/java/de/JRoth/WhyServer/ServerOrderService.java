@@ -21,7 +21,7 @@ public class ServerOrderService extends OrderService {
                 target.terminate();
                 break;
             default:
-                target.logType().log("[SERVER] Received unknown order");
+                target.DisplayType().log("[SERVER] Received unknown order");
         }
     }
 }

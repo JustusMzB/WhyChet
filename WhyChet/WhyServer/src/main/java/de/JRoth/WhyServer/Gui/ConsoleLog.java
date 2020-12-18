@@ -1,4 +1,6 @@
-package de.JRoth.WhyServer;
+package de.JRoth.WhyServer.Gui;
+
+import de.JRoth.WhyServer.Gui.LogService;
 
 public class ConsoleLog implements LogService {
     @Override

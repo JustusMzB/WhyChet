@@ -13,7 +13,7 @@ public class ClientHandler extends Terminateable {
     private final Socket client;
     private final Server server;
     private final InputHandler inputHandler;
-    private final LogService log;
+    private final DisplayService display;
     private User user;
     private ObjectOutputStream msgOut;
     private ObjectInputStream msgIn;
@@ -31,7 +31,7 @@ public class ClientHandler extends Terminateable {
             msgOut = null;
         }
         this.inputHandler = new InputHandler();
-        log = server.logType();
+        display = server.DisplayType();
         user = new User("Uninitialized", "Uninitialized", client, server);
 
     }
@@ -65,6 +65,7 @@ public class ClientHandler extends Terminateable {
                 } else {
                     server.getUsers().put(username, user);
                     loginSuccess = true;
+                    display.addUser(user);
                     sendText("Registration Successful.");
                 }
 
@@ -72,7 +73,7 @@ public class ClientHandler extends Terminateable {
                 user.logOn(this);
                 sendText("Users Online:\n" + onlineUserString());
             }catch (IOException | NullPointerException | ClassNotFoundException e) {
-                log.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
+                display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
                 e.printStackTrace();
                 terminate();
                 break;
@@ -91,7 +92,7 @@ public class ClientHandler extends Terminateable {
                 try {
                     sendMessage(server.getRooms().get(0).getMessage(i));
                 } catch (IOException e) {
-                    log.errLog("[CLIENTHANDLER] " + client + user.getName() + " Failed to update its Chat");
+                    display.errLog("[CLIENTHANDLER] " + client + user.getName() + " Failed to update its Chat");
                     e.printStackTrace();
                     running.set(false);
                     break;
@@ -104,15 +105,15 @@ public class ClientHandler extends Terminateable {
 
     //NO Methods that use this one can be called in here.
     public void terminate() {
-        log.log("[SERVER] [CLIENTHANDLER] " + client + " Terminating Clienthandler for " + user.getName());
+        display.log("[SERVER] [CLIENTHANDLER] " + client + " Terminating Clienthandler for " + user.getName());
         running.set(false);
         try {
             client.close();
         } catch (IOException e) {
-            log.errLog("[SERVER] [CLIENTHANDLER]" + this.getId() + " Issue while closing connection to " + user.getName());
+            display.errLog("[SERVER] [CLIENTHANDLER]" + this.getId() + " Issue while closing connection to " + user.getName());
             e.printStackTrace();
         }
-        log.log(("[SERVER] [CLIENTHANDLER]" + this.getId()) + " Client of " + user.getName() + " was disconnected. Clienthandler will close.");
+        display.log(("[SERVER] [CLIENTHANDLER]" + this.getId()) + " Client of " + user.getName() + " was disconnected. Clienthandler will close.");
     }
 
     @Override
@@ -164,25 +165,25 @@ public class ClientHandler extends Terminateable {
     private class InputHandler extends Thread {
 
         private void orderHandling(Message order) {
-            log.log("[CLIENTHANDLER]" + user.getName() + " Received an order");
+            display.log("[CLIENTHANDLER]" + user.getName() + " Received an order");
             switch ((int) order.getRoomID()) {
                 case -1: {
                     try {
                         sendText("Alright. Connection closing...");
                     } catch (IOException e) {
-                        log.errLog("[CLIENTHANDLER] "+ client + " "+ user.getName() + " Connection error during user-induced Logout");
+                        display.errLog("[CLIENTHANDLER] "+ client + " "+ user.getName() + " Connection error during user-induced Logout");
                         e.printStackTrace();
                     }
                     user.logOff();
                     break;
                 }
                 default:
-                    log.errLog("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
+                    display.errLog("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
             }
         } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
 
         private void messageHandler(Message message) {
-            log.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message");
+            display.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message");
             message = new Message(user.getName(),message.getContent(),message.getRoomID());
             Room myRoom;
             int index = 0;
@@ -205,7 +206,7 @@ public class ClientHandler extends Terminateable {
                     }
                 } catch (IOException | ClassNotFoundException e) {
                     if (running.get()) { // checking wether intentional termination was demanded
-                        log.errLog("[SERVER] [CLIENTHANDLER] " + this.getId() + " " + user.getName() + "'s InputStream is faulty.");
+                        display.errLog("[SERVER] [CLIENTHANDLER] " + this.getId() + " " + user.getName() + "'s InputStream is faulty.");
                         user.logOff();
                     } else {
                         terminate();

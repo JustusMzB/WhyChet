@@ -9,11 +9,10 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyServer.ServerMainSceneCtrl">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyServer.Gui.ServerMainSceneCtrl">
   <tabs>
     <Tab text="Rooms">
          <content>
@@ -30,15 +29,9 @@
                      <content>
                         <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
                           <tabs>
-                            <Tab fx:id="tbUsers" text="Users">
+                            <Tab text="Users">
                                  <content>
-                                     <ScrollPane>
-                                         <VBox fx:id="vbxUsers" prefHeight="200.0" prefWidth="100.0">
-                                             <children>
-                                                 <Button fx:id="btnDummy" mnemonicParsing="false" onAction="#addDummy" text="AddDummy" />
-                                             </children>
-                                         </VBox>
-                                     </ScrollPane>
+                                     <ScrollPane/>
 
                                  </content>
 
@@ -71,14 +64,17 @@
          </content>
     </Tab>
       <Tab text="Users">
-          <VBox prefHeight="200.0" prefWidth="100.0"/>
+          <ScrollPane fx:id="scrllpnUsers" >
+              <content>
+              </content>
+          </ScrollPane>
       </Tab>
       <Tab text="General">
           <ScrollPane prefHeight="200.0" prefWidth="200.0">
               <content>
                   <VBox prefHeight="200.0" prefWidth="100.0">
                       <children>
-                          <Button fx:id="btnClose" mnemonicParsing="false" onAction="#closeServer" text="Close"/>
+                          <Button fx:id="btnClose" mnemonicParsing="false" onAction="#closeServer" text="Close" />
                       </children>
                   </VBox>
               </content>
