@@ -1,5 +1,6 @@
 package de.JRoth.WhyServer.Gui;
 
+import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
 import de.JRoth.WhyServer.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -65,6 +66,12 @@ public class ServerMainSceneCtrl implements DisplayService, Initializable {
 
     public void addUser(User user){
         Platform.runLater(new Users.AddUser(user, allUsers));
+    }
+
+    @Override
+    public void chatMessage(Message message, long id) {
+        rooms.addMessage(message, id);
+        log("[SERVER] a Message is being distributed via Room  " + id);
     }
 
     public void bootStrap(Server server){

@@ -42,6 +42,7 @@ public class Room {
     public void addMessage(Message message) {
         if (message.getRoomID() == id) {
             chat.add(message);
+            server.displayType().chatMessage(message, id);
         }
     }
 
