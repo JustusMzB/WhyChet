@@ -3,10 +3,8 @@ package de.JRoth.WhyServer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
-import javax.swing.plaf.multi.MultiSeparatorUI;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Handler;
 
 public class User {
     private Socket socket;
@@ -51,7 +49,7 @@ public class User {
     }
 
     public void logOff(){
-        server.DisplayType().log("[USER] "+ name + " is being logged off");
+        server.displayType().log("[USER] "+ name + " is being logged off");
         isOnline.set(false);
         if(handler != null) {
             handler.terminate();
@@ -70,7 +68,7 @@ public class User {
             try {
                 handler.sendText(s);
             } catch (IOException e) {
-                server.DisplayType().errLog("[USER]" + name + " Couldn't receive Message");
+                server.displayType().errLog("[USER]" + name + " Couldn't receive Message");
                 e.printStackTrace();
             }
         }

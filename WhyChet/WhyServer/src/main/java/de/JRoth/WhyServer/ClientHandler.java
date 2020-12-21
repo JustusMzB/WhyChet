@@ -31,7 +31,7 @@ public class ClientHandler extends Terminateable {
             msgOut = null;
         }
         this.inputHandler = new InputHandler();
-        display = server.DisplayType();
+        display = server.displayType();
         user = new User("Uninitialized", "Uninitialized", client, server);
 
     }
@@ -66,18 +66,22 @@ public class ClientHandler extends Terminateable {
                     server.getUsers().put(username, user);
                     loginSuccess = true;
                     display.addUser(user);
+                    server.getRooms().get(0).addMember(user);
                     sendText("Registration Successful.");
                 }
-
-                //Login successful
-                user.logOn(this);
-                sendText("Users Online:\n" + onlineUserString());
             }catch (IOException | NullPointerException | ClassNotFoundException e) {
                 display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
                 e.printStackTrace();
                 terminate();
                 break;
             }
+        }
+        //Login successful
+        user.logOn(this);
+        try {
+            sendText("Users Online:\n" + onlineUserString());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }

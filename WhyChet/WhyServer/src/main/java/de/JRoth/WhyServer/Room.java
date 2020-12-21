@@ -8,14 +8,23 @@ import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
 
 public class Room {
     private final long id;
-    private final List<Message> chat = Collections.synchronizedList(new LinkedList<Message>());
+    private final List<Message> chat = Collections.synchronizedList(new LinkedList<>());
+    private final Server server;
+    private final String name;
+
+    public List<User> getMembers() {
+        return members;
+    }
+
     /*TO DO
      *Users in Room
      */
-    private final List<String> members = Collections.synchronizedList(new LinkedList<String>());
+    private final List<User> members = Collections.synchronizedList(new LinkedList<>());
 
-    public Room(int id) {
+    public Room(int id, String name, Server server) {
         this.id = id;
+        this.name = name;
+        this.server = server;
     }
 
     public long getId() {
@@ -36,11 +45,16 @@ public class Room {
         }
     }
 
-    public void addMember(String name) {
-        members.add(name);
+    public void addMember(User user) {
+        members.add(user);
+        server.displayType().memberJoined(this, user);
     }
 
     public void removeMember(String name) {
         members.remove(name);
+    }
+
+    public String getName() {
+    return name;
     }
 }

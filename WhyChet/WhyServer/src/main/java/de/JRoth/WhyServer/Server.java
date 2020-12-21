@@ -7,8 +7,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Server extends Terminateable {
-    private final List<Room> rooms = Collections.synchronizedList(new LinkedList<Room>());
-    private final Map<String, User> users = Collections.synchronizedMap(new HashMap<String, User>());
+    private final List<Room> rooms = Collections.synchronizedList(new LinkedList<>());
+    private final Map<String, User> users = Collections.synchronizedMap(new HashMap<>());
     private DisplayService displayService;
     private ServerSocket serverSocket;
     private final AtomicBoolean running = new AtomicBoolean(false);
@@ -21,7 +21,7 @@ public class Server extends Terminateable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        rooms.add(new Room(1));
+        rooms.add(new Room(1, "Global", this));
     }
 
     public void clientSearch() {
@@ -51,10 +51,15 @@ public class Server extends Terminateable {
     }
     @Override
     public void terminate() {
+        //Client-Search will terminate
+        running.set(false);
+
+        //Logged on clients are removed
         for (User i : users.values()){
             i.logOff();
         }
-        running.set(false);
+
+        //Socket is closed
         try {
             serverSocket.close();
         } catch (IOException e) {
@@ -78,9 +83,10 @@ public class Server extends Terminateable {
         return users;
     }
 
-    public DisplayService DisplayType() {
+    public DisplayService displayType() {
         return displayService;
     }
+
 }
 
 

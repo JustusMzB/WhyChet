@@ -1,8 +1,10 @@
 package de.JRoth.WhyServer;
 
 public interface DisplayService{
-    public void log(String logEntry);
-    public void errLog(String logEntry);
+    void log(String logEntry);
+    void errLog(String logEntry);
 
-    public void addUser(User user);
+    void memberJoined(Room room, User newMember);
+    void memberLeft(Room room, User leavingMember);
+    void addUser(User user);
 }

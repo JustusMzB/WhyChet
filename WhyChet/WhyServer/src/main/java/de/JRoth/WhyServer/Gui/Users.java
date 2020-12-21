@@ -15,15 +15,15 @@ public class Users extends VBox {
     //For non-running application
     void addUser(User user){
         FXMLLoader userLoader = new FXMLLoader(getClass().getResource("/UserView.fxml"));
-        userLoader.<UserView>getController().setUser(user);
+
         Platform.runLater(() -> {
             try {
                 children.add(userLoader.load());
+                userLoader.<UserView>getController().setUser(user);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-        userLoader.<UserView>getController().setUser(user);
     }
 
 

@@ -1,62 +1,101 @@
 package de.JRoth.WhyServer.Gui;
 
-import de.JRoth.WhyServer.DisplayService;
-import de.JRoth.WhyServer.Main;
-import de.JRoth.WhyServer.Server;
-import de.JRoth.WhyServer.User;
-import javafx.application.Application;
+import de.JRoth.WhyServer.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tab;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.text.Text;
 
-import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 
-
-public class ServerMainSceneCtrl implements DisplayService {
+public class ServerMainSceneCtrl implements DisplayService, Initializable {
     final LogService logService = new ConsoleLog();
 
+
     Server server;
-    Users userView;
+    Users allUsers;
+    Rooms rooms;
 
     @FXML
     ScrollPane scrllpnUsers;
-
+    @FXML
+    ScrollPane scrllpnRooms;
     @FXML
     Button btnClose;
+    @FXML
+    Text txtLog;
 
     @Override
     public void log(String logEntry) {
         logService.log(logEntry);
+        Platform.runLater(() -> {
+            String logStr = txtLog.getText();
+            logStr += logEntry + "\n";
+            txtLog.setText(logStr);
+        });
     }
 
     @Override
     public void errLog(String logEntry) {
         logService.errLog(logEntry);
+
+        Platform.runLater(() -> {
+            String logStr = txtLog.getText();
+            logStr += logEntry + "\n";
+            txtLog.setText(logStr);
+        });
+    }
+
+    @Override
+    public void memberJoined(Room room, User newMember) {
+        log("[SERVER] User "+ newMember.getName() +" joined room " + room.getId());
+        this.rooms.addUser(room, newMember);
+
+    }
+
+    @Override
+    public void memberLeft(Room room, User leavingMember) {
+
     }
 
     public void addUser(User user){
-        Platform.runLater(new Users.AddUser(user, userView));
+        Platform.runLater(new Users.AddUser(user, allUsers));
     }
 
-    public void bootStrap(Users userView, Server server){
-        this.userView = userView;
+    public void bootStrap(Server server){
+
+        //Loading Users into the general User view
+        for (User i : server.getUsers().values()){
+            allUsers.addUser(i);
+        }
+
+        // Loading Rooms into room-menu
+        for (Room i : server.getRooms()){
+            addRoom(i);
+        }
+
         this.server = server;
-        scrllpnUsers.setContent(userView);
+    }
+
+    private void addRoom(Room room) {
+        this.rooms.addRoom(room);
     }
 
     @FXML
     void closeServer(ActionEvent event){
         server.terminate();
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        this.allUsers = new Users();
+        scrllpnUsers.setContent(allUsers);
+        this.rooms = new Rooms();
+        scrllpnRooms.setContent(rooms);
     }
 }
