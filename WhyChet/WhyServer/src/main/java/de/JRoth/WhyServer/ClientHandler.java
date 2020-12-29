@@ -187,7 +187,7 @@ public class ClientHandler extends Terminateable {
         } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
 
         private void messageHandler(Message message) {
-            display.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message");
+            display.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message:");
             message = new Message(user.getName(),message.getContent(),message.getRoomID());
             Room myRoom;
             int index = 0;

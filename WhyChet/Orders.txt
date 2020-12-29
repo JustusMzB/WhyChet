@@ -2,3 +2,4 @@ ID          Text Parameter          String Representation       Effect
 -1          username                /disconnect username        disconnects the named user if online
 -2                                  /close                      closes the Server
 -3	        newRoomID						                    Client requests room change/server accepts room change
+-4          roomName                                            RoomMessage evaluation and addition

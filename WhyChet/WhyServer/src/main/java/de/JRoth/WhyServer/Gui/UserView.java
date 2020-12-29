@@ -10,6 +10,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextInputDialog;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -30,6 +31,19 @@ public class UserView implements Initializable {
     @FXML
     void kick(ActionEvent event){
         user.logOff();
+    }
+
+    @FXML
+    void warn(ActionEvent event) {
+        TextInputDialog noteGetter = new TextInputDialog();
+        noteGetter.setContentText("Notification:");
+        noteGetter.setHeaderText("Note to be sent");
+
+        noteGetter.showAndWait();
+        if(noteGetter.getResult() != null){
+            user.notify(noteGetter.getResult());
+        }
+
     }
 
     void setUser(User user){

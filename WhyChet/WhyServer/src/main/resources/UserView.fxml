@@ -9,14 +9,13 @@
 
 
 <HBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyServer.Gui.UserView">
-   <children>
+    <children>
       <Label fx:id="lblUsername" text="username">
          <contextMenu>
             <ContextMenu>
               <items>
-                <MenuItem fx:id="kick" mnemonicParsing="false" text="Kick" onAction="#kick">
-
-          </MenuItem>
+                <MenuItem fx:id="kick" mnemonicParsing="false" text="Kick" onAction="#kick"></MenuItem>
+                  <MenuItem fx:id="warn" mnemonicParsing="false" text="Warn" onAction="#warn"></MenuItem>
               </items>
             </ContextMenu>
          </contextMenu>

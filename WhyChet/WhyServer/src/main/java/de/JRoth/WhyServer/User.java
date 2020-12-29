@@ -1,5 +1,6 @@
 package de.JRoth.WhyServer;
 
+import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteUser;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -26,7 +27,15 @@ public class User {
         this.socket = socket;
         this.server = server;
     }
-
+    public void notify(String note){
+        try {
+            handler.sendText(note);
+            server.displayType().log("[CLIENTHANDLER] " + name + " was notified: \"" + note +"\"");
+        } catch (IOException e) {
+            server.displayType().errLog("[User] "+ name + ": Could not send notification " + note );
+            e.printStackTrace();
+        }
+    }
     public Socket getSocket() {
         return socket;
     }
@@ -89,6 +98,10 @@ public class User {
     }
     public BooleanProperty getOnlineProperty(){
         return isOnline;
+    }
+
+    public LiteUser makeLite(){
+        return new LiteUser(getName(), isOnline());
     }
 
     public boolean hasPassword(String pw) {

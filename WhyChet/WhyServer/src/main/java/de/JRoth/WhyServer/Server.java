@@ -74,6 +74,9 @@ public class Server extends Terminateable {
             displayService.log("[SERVER] disconnectUser Failed: Unknown user");
         }
     }
+    public void warnUser(User user){
+        user.notify("You have been warned!!!");
+    }
 
     public List<Room> getRooms() {
         return rooms;
