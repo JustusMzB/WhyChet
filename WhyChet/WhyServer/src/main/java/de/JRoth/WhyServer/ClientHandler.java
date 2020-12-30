@@ -5,7 +5,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteRoom;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
+
+import static de.JRoth.WhyServer.LiteObjectFactory.makeLite;
 
 
 public class ClientHandler extends Terminateable {
@@ -80,6 +85,7 @@ public class ClientHandler extends Terminateable {
         user.logOn(this);
         try {
             sendText("Users Online:\n" + onlineUserString());
+            sendMessage(RoomMessage.setRoomMessage(makeLite(user.getRoom())));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -156,15 +162,6 @@ public class ClientHandler extends Terminateable {
             msgOut.writeObject(message);
     }
 
-    //Getters and Setters
-    public Socket getClient() {
-        return client;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
     //Internal Helper Thread
     private class InputHandler extends Thread {
 
@@ -181,23 +178,40 @@ public class ClientHandler extends Terminateable {
                     user.logOff();
                     break;
                 }
+                case -3:{
+                 switchRoom(order);
+                }
                 default:
                     display.errLog("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
             }
         } // Sollte mit ner Switch-Anweisung verschiedene Befehl-IDs behandeln
 
         private void messageHandler(Message message) {
-            display.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message:");
-            message = new Message(user.getName(),message.getContent(),message.getRoomID());
-            Room myRoom;
-            int index = 0;
-            do {
-                myRoom = server.getRooms().get(index);
-                index++;
-            } while (index < server.getRooms().size() && myRoom.getId() != message.getRoomID());
-            myRoom.addMessage(message);
+            display.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message:" + message.getContent());
+            if(message.getRoomID() == user.getRoom().getId()){
+                user.getRoom().addMessage(message);
+            }
         }
 
+        private void switchRoom(Message message){
+            display.log("[CLIENTHANDLER] "+ user.getName() +" Requests room switch to " + message.getContent());
+            RoomMessage roomMessage = (RoomMessage) message;
+            user.getRoom().removeMember(user);
+            long requestedId = roomMessage.getRoom().getRoomId();
+            for(Room i:server.getRooms()) {
+                if (i.getId() == requestedId) {
+                    user.setRoom(i);
+                }
+            }
+            try {
+                sendMessage(RoomMessage.setRoomMessage(makeLite(user.getRoom())));
+            } catch (IOException e) {
+                display.errLog("[CLIENTHANDLER] " + user.getName() + " Failed to send RoomMessage with " + user.getRoom().getName());
+                e.printStackTrace();
+            }
+            user.getRoom().addMember(user);
+
+        }
         @Override
         public void run() {
             while (running.get()) {

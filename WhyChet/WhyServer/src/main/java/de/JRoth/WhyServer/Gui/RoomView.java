@@ -50,6 +50,9 @@ public class RoomView implements Initializable {
     public void addMember(User member){
         users.addUser(member);
     }
+    public void removeMember(User member) {
+        users.removeUser(member);
+    }
 
     public void setUsers(Users users) {
         this.users = users;

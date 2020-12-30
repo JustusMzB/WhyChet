@@ -61,7 +61,8 @@ public class ServerMainSceneCtrl implements DisplayService, Initializable {
 
     @Override
     public void memberLeft(Room room, User leavingMember) {
-
+        log("[SERVER] User "+ leavingMember.getName() + " left room " + room.getId());
+        rooms.removeUser(room, leavingMember);
     }
 
     public void addUser(User user){

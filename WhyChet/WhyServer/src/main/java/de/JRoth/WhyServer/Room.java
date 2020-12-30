@@ -1,9 +1,10 @@
 package de.JRoth.WhyServer;
 
+import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
 
 
 public class Room {
@@ -11,11 +12,6 @@ public class Room {
     private final List<Message> chat = Collections.synchronizedList(new LinkedList<>());
     private final Server server;
     private final String name;
-
-    public List<User> getMembers() {
-        return members;
-    }
-
     /*TO DO
      *Users in Room
      */
@@ -25,6 +21,14 @@ public class Room {
         this.id = id;
         this.name = name;
         this.server = server;
+    }
+
+    public List<Message> getChat() {
+        return chat;
+    }
+
+    public List<User> getMembers() {
+        return members;
     }
 
     public long getId() {
@@ -51,11 +55,12 @@ public class Room {
         server.displayType().memberJoined(this, user);
     }
 
-    public void removeMember(String name) {
-        members.remove(name);
+    public void removeMember(User user) {
+        members.remove(user);
+        server.displayType().memberLeft(this, user);
     }
 
     public String getName() {
-    return name;
+        return name;
     }
 }

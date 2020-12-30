@@ -15,10 +15,19 @@ public class User {
     private BooleanProperty isOnline = new SimpleBooleanProperty(false);
     private Server server;
 
-    //public sample.Room& room;
+    public Room getRoom() {
+        return myRoom;
+    }
+
+    public void setRoom(Room myRoom) {
+        this.myRoom = myRoom;
+    }
+
+    private Room myRoom;
+
     public User(Socket socket, Server server) {
         this.socket = socket;
-        this.server =server;
+        this.server = server;
     }
 
     public User(String name, String password, Socket socket, Server server) {
@@ -40,7 +49,6 @@ public class User {
         return socket;
     }
 
-
     public void setSocket(Socket socket) {
         this.socket = socket;
     }
@@ -60,6 +68,12 @@ public class User {
     public void logOff(){
         server.displayType().log("[USER] "+ name + " is being logged off");
         isOnline.set(false);
+
+        //Makes sure that the user is not in any room anymore
+        if(myRoom != null){
+            myRoom.removeMember(this);
+            myRoom = null;
+        }
         if(handler != null) {
             handler.terminate();
             this.handler = null;
@@ -85,7 +99,13 @@ public class User {
 
     public void logOn(ClientHandler handler) {
         isOnline.set(true);
+
+        //Puts the user in Global
         this.handler = handler;
+        myRoom = server.getRooms().get(0);
+        myRoom.addMember(this);
+
+        //Sends online notification
         for(User i : server.getUsers().values()){
             if (!i.equals(this)){
                 i.receiveMessage(name + " just came online.");
@@ -100,9 +120,6 @@ public class User {
         return isOnline;
     }
 
-    public LiteUser makeLite(){
-        return new LiteUser(getName(), isOnline());
-    }
 
     public boolean hasPassword(String pw) {
         return password.equals(pw);

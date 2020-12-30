@@ -1,6 +1,7 @@
 package de.JRoth.WhyChet.WhyShareClasses.Messages;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class LiteRoom {
     public String getRoomName() {
@@ -11,20 +12,20 @@ public class LiteRoom {
         return roomId;
     }
 
-    public ArrayList<LiteUser> getUsers() {
+    public List<LiteUser> getUsers() {
         return users;
     }
 
-    public ArrayList<Message> getMessages() {
+    public List<Message> getMessages() {
         return messages;
     }
 
     private String roomName;
     private long roomId;
-    private ArrayList<LiteUser> users;
-    private ArrayList<Message> messages;
+    private List<LiteUser> users;
+    private List<Message> messages;
 
-    public LiteRoom(String roomName, long roomId, ArrayList<LiteUser> users, ArrayList<Message> messages) {
+    public LiteRoom(String roomName, long roomId, List<LiteUser> users, List<Message> messages) {
         this.roomName = roomName;
         this.roomId = roomId;
         this.users = users;

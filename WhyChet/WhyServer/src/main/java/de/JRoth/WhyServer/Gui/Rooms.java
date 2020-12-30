@@ -25,4 +25,8 @@ public class Rooms extends Accordion {
     void addUser(Room room, User user){
         this.controllers.get(room.getId()).addMember(user);
     }
+    //Selects correct roomview and asks it to remove the user
+    void removeUser(Room room, User user) {
+        controllers.get(room.getId()).removeMember(user);
+    }
 }
