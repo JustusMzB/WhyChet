@@ -71,7 +71,6 @@ public class ClientHandler extends Terminateable {
                     server.getUsers().put(username, user);
                     loginSuccess = true;
                     display.addUser(user);
-                    server.getRooms().get(0).addMember(user);
                     sendText("Registration Successful.");
                 }
             }catch (IOException | NullPointerException | ClassNotFoundException e) {

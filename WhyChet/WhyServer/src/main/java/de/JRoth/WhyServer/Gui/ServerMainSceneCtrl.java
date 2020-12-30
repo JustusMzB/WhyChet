@@ -66,7 +66,7 @@ public class ServerMainSceneCtrl implements DisplayService, Initializable {
     }
 
     public void addUser(User user){
-        Platform.runLater(new Users.AddUser(user, allUsers));
+        allUsers.addUser(user);
     }
 
     @Override

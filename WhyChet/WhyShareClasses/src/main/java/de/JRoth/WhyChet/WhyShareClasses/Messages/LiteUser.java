@@ -1,6 +1,9 @@
 package de.JRoth.WhyChet.WhyShareClasses.Messages;
 
-public class LiteUser {
+
+import java.io.Serializable;
+
+public class LiteUser implements Serializable {
     private String username;
     private boolean isOnline;
 

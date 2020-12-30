@@ -28,7 +28,15 @@ public class LiteObjectFactory {
         if( subListStart < 0){
             subListStart = 0;
         }
+        int subListEnd = room.getChat().size()-1;
+        if(subListEnd < 0){
+            subListEnd = 0;
+        }
+        List<Message> messageSelection = new ArrayList<>();
+        if(room.getChat().size() > 0){
+            messageSelection = room.getChat().subList(subListStart, subListEnd);
+        }
         //Returns a literoom with the 100 last messages
-        return new LiteRoom(room.getName(), room.getId(), makeLite(room.getMembers()), room.getChat().subList(subListStart, room.getChat().size()-1));
+        return new LiteRoom(room.getName(), room.getId(), makeLite(room.getMembers()), messageSelection);
     }
 }

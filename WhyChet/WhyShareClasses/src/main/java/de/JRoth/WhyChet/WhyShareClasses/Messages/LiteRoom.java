@@ -1,9 +1,10 @@
 package de.JRoth.WhyChet.WhyShareClasses.Messages;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LiteRoom {
+public class LiteRoom implements Serializable {
     public String getRoomName() {
         return roomName;
     }
