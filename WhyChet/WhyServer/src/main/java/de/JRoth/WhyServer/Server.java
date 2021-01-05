@@ -1,5 +1,8 @@
 package de.JRoth.WhyServer;
 
+import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -23,6 +26,22 @@ public class Server extends Terminateable {
         }
         rooms.add(new Room(1, "Global", this));
     }
+
+    private void roomUpdate(Room room){
+        for(User i : users.values()){
+            if(i.isOnline()){
+                Message updateMessage = RoomMessage.setRoomMessage(LiteObjectFactory.makeLite(room));
+                try {
+                    i.sendMessage(updateMessage);
+                    displayService.log("[SERVER] User " + i.getName() + " was updated on changes to room " + room.getId());
+                } catch (NullPointerException e) {
+                    displayService.errLog("[SERVER] User " + i.getName() + " Could not be updated on changes to room " + room.getId());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 
     public void clientSearch() {
         Socket newClient;
@@ -88,6 +107,47 @@ public class Server extends Terminateable {
 
     public DisplayService displayType() {
         return displayService;
+    }
+    public void removeRoom(Room room){
+        if(room != rooms.get(0) ) {
+            //Cloning the Members list to avoid exception in iteration
+            displayService.log("[SERVER] Room " + room.getId() + " is being disbanded");
+            LinkedList<User> roomMemberClone = new LinkedList<>(room.getMembers());
+            for (User i : roomMemberClone) {
+                room.removeMember(i);
+                rooms.get(0).addMember(i);
+            }
+            displayService.removeRoom(room);
+        }
+    }
+
+    public void editRoom(int id, String newName){
+        for (Room i : rooms){
+            if(i.getId() == id){
+                editRoom(i, newName);
+            }
+        }
+    }
+    public void editRoom(Room target, String newName){
+        target.setName(newName);
+        roomUpdate(target);
+        displayService.updateRoom(target);
+    }
+
+    public void addRoom(String roomName){
+        int newRoomID = rooms.size();
+        //Retrieving a free roomID, This only works, if monotony of roomid's is ensured.
+        for( Room i : rooms){
+            if(i.getId() == newRoomID){
+                newRoomID++;
+            }
+        }
+        Room newRoom = new Room(newRoomID, roomName, this );
+        rooms.add(newRoom);
+        displayService.addRoom(newRoom);
+
+        //Remaining requirement: Update all clients on the new room
+        roomUpdate(newRoom);
     }
 
 }

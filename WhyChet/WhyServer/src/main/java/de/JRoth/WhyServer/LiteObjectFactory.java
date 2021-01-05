@@ -6,18 +6,20 @@ import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
 import de.JRoth.WhyServer.Room;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 
 public class LiteObjectFactory {
     public static LiteUser makeLite(User user){
         return new LiteUser(user.getName(), user.isOnline());
     }
 
-    public static List<LiteUser> makeLite(List<User> users){
-        ArrayList<LiteUser> retList = new ArrayList<>();
+    //Usage of LinkedList for Serialization Purposes
+    public static LinkedList<LiteUser> makeLite(List<User> users){
+
+        //Iteration for Lack of better options
+        LinkedList<LiteUser> retList = new LinkedList<>();
         for (User i : users){
             retList.add(makeLite(i));
         }
@@ -32,9 +34,9 @@ public class LiteObjectFactory {
         if(subListEnd < 0){
             subListEnd = 0;
         }
-        List<Message> messageSelection = new ArrayList<>();
+        LinkedList<Message> messageSelection = new LinkedList<>();
         if(room.getChat().size() > 0){
-            messageSelection = room.getChat().subList(subListStart, subListEnd);
+            messageSelection.addAll(room.getChat().subList(subListStart, subListEnd));
         }
         //Returns a literoom with the 100 last messages
         return new LiteRoom(room.getName(), room.getId(), makeLite(room.getMembers()), messageSelection);

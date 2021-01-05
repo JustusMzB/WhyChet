@@ -11,4 +11,10 @@ public interface DisplayService{
     void addUser(User user);
 
     void chatMessage(Message message, long id);
+
+    void addRoom(Room newRoom);
+
+    void updateRoom(Room target);
+
+    void removeRoom(Room room);
 }

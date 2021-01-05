@@ -1,6 +1,9 @@
 package de.JRoth.WhyServer;
 
+import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteRoom;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteUser;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -80,16 +83,16 @@ public class User {
         }
         for (User i : server.getUsers().values()){
             if(i.isOnline()){
-                i.receiveMessage(name + " went offline");
+                i.notify(name + " went offline");
             }
         }
 
     }
 
-    private void receiveMessage(String s) {
+    void sendMessage(Message message) {
         if (handler != null){
             try {
-                handler.sendText(s);
+                handler.sendMessage(message);
             } catch (IOException e) {
                 server.displayType().errLog("[USER]" + name + " Couldn't receive Message");
                 e.printStackTrace();
@@ -108,7 +111,7 @@ public class User {
         //Sends online notification
         for(User i : server.getUsers().values()){
             if (!i.equals(this)){
-                i.receiveMessage(name + " just came online.");
+                i.notify(name + " just came online.");
             }
         }
     }

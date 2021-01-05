@@ -157,7 +157,7 @@ public class ClientHandler extends Terminateable {
             msgOut.writeObject(message);
     }
 
-    private void sendMessage(Message message) throws IOException {
+    void sendMessage(Message message) throws IOException {
             msgOut.writeObject(message);
     }
 
@@ -194,22 +194,14 @@ public class ClientHandler extends Terminateable {
 
         private void switchRoom(Message message){
             display.log("[CLIENTHANDLER] "+ user.getName() +" Requests room switch to " + message.getContent());
-            RoomMessage roomMessage = (RoomMessage) message;
             user.getRoom().removeMember(user);
+            RoomMessage roomMessage = (RoomMessage) message;
             long requestedId = roomMessage.getRoom().getRoomId();
             for(Room i:server.getRooms()) {
                 if (i.getId() == requestedId) {
-                    user.setRoom(i);
+                    i.addMember(user);
                 }
             }
-            try {
-                sendMessage(RoomMessage.setRoomMessage(makeLite(user.getRoom())));
-            } catch (IOException e) {
-                display.errLog("[CLIENTHANDLER] " + user.getName() + " Failed to send RoomMessage with " + user.getRoom().getName());
-                e.printStackTrace();
-            }
-            user.getRoom().addMember(user);
-
         }
         @Override
         public void run() {

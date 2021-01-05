@@ -27,6 +27,7 @@
                   <VBox prefHeight="369.0" prefWidth="600.0">
                       <children>
                           <Button fx:id="btnClose" mnemonicParsing="false" onAction="#closeServer" text="Close" />
+                          <Button fx:id="btnNewRoom" mnemonicParsing="false" onAction="#addRoom" text="New Room" />
                           <Text fx:id="txtLog"/>
                       </children>
                   </VBox>

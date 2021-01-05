@@ -1,17 +1,22 @@
 package de.JRoth.WhyServer;
 
 import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
+import javafx.beans.property.StringProperty;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import static de.JRoth.WhyServer.LiteObjectFactory.makeLite;
 
 
 public class Room {
     private final long id;
     private final List<Message> chat = Collections.synchronizedList(new LinkedList<>());
     private final Server server;
-    private final String name;
+    private String name;
     /*TO DO
      *Users in Room
      */
@@ -51,16 +56,40 @@ public class Room {
     }
 
     public void addMember(User user) {
-        members.add(user);
-        server.displayType().memberJoined(this, user);
+        if(user.isOnline()) {
+            members.add(user);
+            user.setRoom(this);
+            RoomMessage roomMessage = RoomMessage.setRoomMessage(LiteObjectFactory.makeLite(this));
+            user.sendMessage(roomMessage);
+
+            //UI update
+            server.displayType().memberJoined(this, user);
+            for (User i : members) {
+                i.notify("User " + user.getName() + " Joined the room.");
+            }
+        }
     }
 
     public void removeMember(User user) {
         members.remove(user);
+        //Up for discussion: Notify the client that the user is not in a room
         server.displayType().memberLeft(this, user);
     }
 
     public String getName() {
         return name;
+    }
+
+    //Quick and dirty: Direct hook for the GUI-Roomview without knowing server
+    public void rename(String newName){
+        server.editRoom(this, newName);
+    }
+
+    //Quick and Dirty: Deletion hook for Gui roomview
+    public void delete(){
+        server.removeRoom(this);
+    }
+    public void setName(String newName) {
+        name = newName;
     }
 }

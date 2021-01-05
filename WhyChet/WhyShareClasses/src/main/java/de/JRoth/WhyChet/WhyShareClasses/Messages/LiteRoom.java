@@ -2,6 +2,7 @@ package de.JRoth.WhyChet.WhyShareClasses.Messages;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class LiteRoom implements Serializable {
@@ -23,10 +24,12 @@ public class LiteRoom implements Serializable {
 
     private String roomName;
     private long roomId;
-    private List<LiteUser> users;
-    private List<Message> messages;
 
-    public LiteRoom(String roomName, long roomId, List<LiteUser> users, List<Message> messages) {
+    //Using a LinkedList, because the List Interface is not per se serializeable
+    private LinkedList<LiteUser> users;
+    private LinkedList<Message> messages;
+
+    public LiteRoom(String roomName, long roomId, LinkedList<LiteUser> users, LinkedList<Message> messages) {
         this.roomName = roomName;
         this.roomId = roomId;
         this.users = users;
