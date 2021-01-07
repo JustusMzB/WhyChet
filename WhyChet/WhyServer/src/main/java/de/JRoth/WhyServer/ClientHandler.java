@@ -6,7 +6,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteRoom;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
 
@@ -37,7 +36,7 @@ public class ClientHandler extends Terminateable {
         }
         this.inputHandler = new InputHandler();
         display = server.displayType();
-        user = new User("Uninitialized", "Uninitialized", client, server);
+        user = new User("Uninitialized", "Uninitialized".hashCode(), server);
 
     }
 
@@ -53,7 +52,7 @@ public class ClientHandler extends Terminateable {
                 username = receiveText();
                 sendText("Type in your password.");
                 password = receiveText();
-                user = new User(username, password, client, server);
+                user = new User(username, password.hashCode(), server);
                 // User whose name is already registered.
                 if (server.getUsers().containsKey(username)) {
                     //Username is taken

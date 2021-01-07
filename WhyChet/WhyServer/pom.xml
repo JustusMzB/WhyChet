@@ -48,6 +48,7 @@
             <artifactId>javafx-controls</artifactId>
             <version>15.0.1</version>
         </dependency>
+
     </dependencies>
 
 </project>

@@ -13,6 +13,9 @@ public class Server extends Terminateable {
     private final List<Room> rooms = Collections.synchronizedList(new LinkedList<>());
     private final Map<String, User> users = Collections.synchronizedMap(new HashMap<>());
     private DisplayService displayService;
+    private PersistenceService persistence;
+
+
     private ServerSocket serverSocket;
     private final AtomicBoolean running = new AtomicBoolean(false);
 

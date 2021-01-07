@@ -1,19 +1,14 @@
 package de.JRoth.WhyServer;
 
-import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteRoom;
-import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteUser;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
-import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.IOException;
-import java.net.Socket;
 
 public class User {
-    private Socket socket;
     private String name;
-    private String password;
+    private int passHash;
     private ClientHandler handler;
     private BooleanProperty isOnline = new SimpleBooleanProperty(false);
     private Server server;
@@ -28,15 +23,13 @@ public class User {
 
     private Room myRoom;
 
-    public User(Socket socket, Server server) {
-        this.socket = socket;
+    public User(Server server) {
         this.server = server;
     }
 
-    public User(String name, String password, Socket socket, Server server) {
+    public User(String name, int passHash, Server server) {
         this.name = name;
-        this.password = password;
-        this.socket = socket;
+        this.passHash = passHash;
         this.server = server;
     }
     public void notify(String note){
@@ -47,13 +40,6 @@ public class User {
             server.displayType().errLog("[User] "+ name + ": Could not send notification " + note );
             e.printStackTrace();
         }
-    }
-    public Socket getSocket() {
-        return socket;
-    }
-
-    public void setSocket(Socket socket) {
-        this.socket = socket;
     }
 
     public String getName() {
@@ -117,7 +103,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.passHash = password.hashCode();
     }
     public BooleanProperty getOnlineProperty(){
         return isOnline;
@@ -125,7 +111,10 @@ public class User {
 
 
     public boolean hasPassword(String pw) {
-        return password.equals(pw);
+        return passHash== pw.hashCode();
+    }
+    public int getPassHash(){
+        return passHash;
     }
 
 
