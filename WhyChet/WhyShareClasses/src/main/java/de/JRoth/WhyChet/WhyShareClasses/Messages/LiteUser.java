@@ -19,4 +19,8 @@ public class LiteUser implements Serializable {
     public boolean isOnline() {
         return isOnline;
     }
+
+    public void setOnline(boolean online) {
+        this.isOnline = online;
+    }
 }

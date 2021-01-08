@@ -5,3 +5,5 @@ ID          Text Parameter          String Representation       Effect
 -4                                                              RoomMessage evaluation and addition
 -5          id                                                  The room of ID was deleted, client has to adapt its list
 -6          username                                            UserMessage containing LiteUser is evaluated and overrides existing entry
+-7          username                /login                      sends the server login data for evaluation
+-8          Response                                            gives the client feedback on the success of its request

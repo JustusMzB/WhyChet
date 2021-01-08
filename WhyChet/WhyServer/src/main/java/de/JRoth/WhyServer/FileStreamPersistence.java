@@ -1,5 +1,6 @@
 package de.JRoth.WhyServer;
 
+import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteUser;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
 
 import java.io.*;
@@ -8,9 +9,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class FileStreamPersistence implements PersistenceService{
-    File roomsFile= new File(this.getClass().getResource("roomPers").toString());
-    File loginsFile = new File(this.getClass().getResource("lgns").toString());
+/* public class FileStreamPersistence implements PersistenceService{
+    File roomsFile;
+    File loginsFile;
+
+    FileStreamPersistence(){
+        this.roomsFile = new File("rooms");
+        this.loginsFile = new File("lgns");
+    }
     @Override
     public void storeRooms(List<Room> rooms) {
 
@@ -60,12 +66,12 @@ public class FileStreamPersistence implements PersistenceService{
     }
 
     @Override
-    public List<Room> loadRooms() {
+    public List<Room> loadRooms(Server server) {
         return null;
     }
 
     private class SerializeableRoom implements Serializable {
-        public LinkedList<User> getMembers() {
+        public LinkedList<LiteUser> getMembers() {
             return members;
         }
 
@@ -75,10 +81,10 @@ public class FileStreamPersistence implements PersistenceService{
 
         SerializeableRoom(Room room){
             this.messages = new LinkedList<Message>(room.getChat());
-            this.members = new LinkedList<User>(room.getMembers());
+            this.members = new LinkedList<LiteUser>(LiteObjectFactory.makeLite(room.getMembers()));
         }
 
-        private LinkedList<User> members;
+        private LinkedList<LiteUser> members;
         private LinkedList<Message> messages;
     }
     private class Login implements Serializable {
@@ -99,3 +105,4 @@ public class FileStreamPersistence implements PersistenceService{
         }
     }
 }
+*/

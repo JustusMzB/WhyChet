@@ -1,13 +1,15 @@
 package de.JRoth.WhyServer;
 
+import de.JRoth.WhyChet.WhyShareClasses.Messages.LoginMessage;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.ServerResponse;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
-import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
 
 import static de.JRoth.WhyServer.LiteObjectFactory.makeLite;
 
@@ -42,37 +44,53 @@ public class ClientHandler extends Terminateable {
 
     //Login Dialogue
     private void login() {
-        String username;
-        String password;
+        String username = null;
+        String password = null;
+        LoginMessage login = null;
+        Message receivedMessage;
+
+
         boolean loginSuccess = false;
 
         while (!loginSuccess) {
+
             try {
-                sendText("Type in your Username please. If it is unknown, you will receive a new account.");
-                username = receiveText();
-                sendText("Type in your password.");
-                password = receiveText();
+                //receiving a proper loginmessage
+                do {
+                    receivedMessage = receiveMessage();
+                } while (receivedMessage.getRoomID() != -7);
+
+                login = (LoginMessage) receivedMessage;
+                username = login.getUserName();
+                password = login.getPassword();
+
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+                terminate();
+            }
+
+
+
+            try {
                 user = new User(username, password.hashCode(), server);
                 // User whose name is already registered.
                 if (server.getUsers().containsKey(username)) {
                     //Username is taken
-                    if (server.getUsers().get(username).isOnline()) {
-                        sendText("The User is already logged in");
-                    } else if (server.getUsers().get(username).hasPassword(password)) {
-                        sendText("Login Successful.");
+                    if (server.getUsers().get(username).isOnline()) { //User already online
+                        sendMessage(new ServerResponse(false));
+                    } else if (server.getUsers().get(username).hasPassword(password)) {//User offline: Password check
                         loginSuccess = true;
                         user = server.getUsers().get(username);
                     } else {
-                        sendText("The Username is TAKEN!");
+                        sendMessage(new ServerResponse(false));
                     }
                     //Username is unknown
                 } else {
                     server.getUsers().put(username, user);
                     loginSuccess = true;
                     display.addUser(user);
-                    sendText("Registration Successful.");
                 }
-            }catch (IOException | NullPointerException | ClassNotFoundException e) {
+            } catch (IOException | NullPointerException e) {
                 display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
                 e.printStackTrace();
                 terminate();
@@ -80,12 +98,22 @@ public class ClientHandler extends Terminateable {
             }
         }
         //Login successful
+        //This will still be reached upon exception, creating user Uninitialized
+        try {
+            sendMessage(new ServerResponse(true));
+        } catch (IOException e) {
+            display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
+            e.printStackTrace();
+            terminate();
+        }
         user.logOn(this);
         try {
             sendText("Users Online:\n" + onlineUserString());
             sendMessage(RoomMessage.setRoomMessage(makeLite(user.getRoom())));
         } catch (IOException e) {
+            display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
             e.printStackTrace();
+            terminate();
         }
 
     }
@@ -148,16 +176,22 @@ public class ClientHandler extends Terminateable {
 
     private String receiveText() throws IOException, ClassNotFoundException {
 
-            return ((Message) msgIn.readObject()).getContent();
+        return ((Message) msgIn.readObject()).getContent();
     }
 
     public void sendText(String text) throws IOException {
         Message message = new Message("[SERVER]", text, 1);
-            msgOut.writeObject(message);
+        msgOut.writeObject(message);
     }
 
     void sendMessage(Message message) throws IOException {
-            msgOut.writeObject(message);
+        msgOut.writeObject(message);
+    }
+
+    private Message receiveMessage() throws IOException, ClassNotFoundException {
+
+        return (Message) msgIn.readObject();
+
     }
 
     //Internal Helper Thread
@@ -170,14 +204,14 @@ public class ClientHandler extends Terminateable {
                     try {
                         sendText("Alright. Connection closing...");
                     } catch (IOException e) {
-                        display.errLog("[CLIENTHANDLER] "+ client + " "+ user.getName() + " Connection error during user-induced Logout");
+                        display.errLog("[CLIENTHANDLER] " + client + " " + user.getName() + " Connection error during user-induced Logout");
                         e.printStackTrace();
                     }
                     user.logOff();
                     break;
                 }
-                case -3:{
-                 switchRoom(order);
+                case -3: {
+                    switchRoom(order);
                 }
                 default:
                     display.errLog("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
@@ -186,22 +220,23 @@ public class ClientHandler extends Terminateable {
 
         private void messageHandler(Message message) {
             display.log("[CLIENTHANDLER]" + user.getName() + " Sent in a Message:" + message.getContent());
-            if(message.getRoomID() == user.getRoom().getId()){
+            if (message.getRoomID() == user.getRoom().getId()) {
                 user.getRoom().addMessage(message);
             }
         }
 
-        private void switchRoom(Message message){
-            display.log("[CLIENTHANDLER] "+ user.getName() +" Requests room switch to " + message.getContent());
+        private void switchRoom(Message message) {
+            display.log("[CLIENTHANDLER] " + user.getName() + " Requests room switch to " + message.getContent());
             user.getRoom().removeMember(user);
             RoomMessage roomMessage = (RoomMessage) message;
             long requestedId = roomMessage.getRoom().getRoomId();
-            for(Room i:server.getRooms()) {
+            for (Room i : server.getRooms()) {
                 if (i.getId() == requestedId) {
                     i.addMember(user);
                 }
             }
         }
+
         @Override
         public void run() {
             while (running.get()) {

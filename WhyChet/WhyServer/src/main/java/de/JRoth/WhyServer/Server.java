@@ -10,8 +10,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Server extends Terminateable {
-    private final List<Room> rooms = Collections.synchronizedList(new LinkedList<>());
-    private final Map<String, User> users = Collections.synchronizedMap(new HashMap<>());
+    private final List<Room> rooms;
+    private Map<String, User> users;
     private DisplayService displayService;
     private PersistenceService persistence;
 
@@ -20,14 +20,36 @@ public class Server extends Terminateable {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public Server(int port, DisplayService displayService) {
+        //Initialisation of Components
         this.displayService = displayService;
+        persistence = new JsonPersistence();
+
+        //Socket Connection
         try {
             serverSocket = new ServerSocket(port);
             //serverSocket.setSoTimeout(500000);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        rooms.add(new Room(1, "Global", this));
+
+        //Initialisation of rooms
+        List<Room> loadedRooms = persistence.loadRooms(this);
+        if(loadedRooms == null){
+            rooms = Collections.synchronizedList(new LinkedList<>());
+            rooms.add(new Room(1, "Global", this));
+        } else {
+            rooms = Collections.synchronizedList(loadedRooms);
+        }
+
+        //Initialisation of Logindata
+        Map<String, User> loadedCreds = persistence.loadUsers(this);
+        if(loadedCreds != null){
+            users = Collections.synchronizedMap(loadedCreds);
+        } else {
+            users = Collections.synchronizedMap(new HashMap<>());
+        }
+
+
     }
 
     private void roomUpdate(Room room){
@@ -87,6 +109,14 @@ public class Server extends Terminateable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        //Rooms and Credentials are stored
+
+        persistence.storeRooms(rooms);
+        displayService.log("[SERVER] Rooms are being stored");
+        persistence.storeUsers(users);
+        displayService.log("[SERVER] Credentials are being stored");
+
     }
 
     public void disconnectUser(String username) {

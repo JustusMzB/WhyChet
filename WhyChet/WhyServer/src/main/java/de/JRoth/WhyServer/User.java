@@ -31,14 +31,17 @@ public class User {
         this.name = name;
         this.passHash = passHash;
         this.server = server;
+        this.isOnline.set(false);
     }
     public void notify(String note){
-        try {
-            handler.sendText(note);
-            server.displayType().log("[CLIENTHANDLER] " + name + " was notified: \"" + note +"\"");
-        } catch (IOException e) {
-            server.displayType().errLog("[User] "+ name + ": Could not send notification " + note );
-            e.printStackTrace();
+        if (isOnline()) {
+            try {
+                handler.sendText(note);
+                server.displayType().log("[CLIENTHANDLER] " + name + " was notified: \"" + note + "\"");
+            } catch (IOException e) {
+                server.displayType().errLog("[User] " + name + ": Could not send notification " + note);
+                e.printStackTrace();
+            }
         }
     }
 
@@ -55,24 +58,25 @@ public class User {
     }
 
     public void logOff(){
-        server.displayType().log("[USER] "+ name + " is being logged off");
-        isOnline.set(false);
+        if(isOnline()) {
+            server.displayType().log("[USER] " + name + " is being logged off");
+            isOnline.set(false);
 
-        //Makes sure that the user is not in any room anymore
-        if(myRoom != null){
-            myRoom.removeMember(this);
-            myRoom = null;
-        }
-        if(handler != null) {
-            handler.terminate();
-            this.handler = null;
-        }
-        for (User i : server.getUsers().values()){
-            if(i.isOnline()){
-                i.notify(name + " went offline");
+            //Makes sure that the user is not in any room anymore
+            if (myRoom != null) {
+                myRoom.removeMember(this);
+                myRoom = null;
+            }
+            if (handler != null) {
+                handler.terminate();
+                this.handler = null;
+            }
+            for (User i : server.getUsers().values()) {
+                if (i.isOnline()) {
+                    i.notify(name + " went offline");
+                }
             }
         }
-
     }
 
     void sendMessage(Message message) {
@@ -96,7 +100,7 @@ public class User {
 
         //Sends online notification
         for(User i : server.getUsers().values()){
-            if (!i.equals(this)){
+            if (! (i == this)){
                 i.notify(name + " just came online.");
             }
         }

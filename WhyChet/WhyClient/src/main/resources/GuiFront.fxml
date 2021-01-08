@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.text.Text?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyClient.Gui.GuiFassade">
+   <top>
+      <HBox prefHeight="26.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <RadioButton fx:id="rbOnline" mnemonicParsing="false" onAction="#toggleOnline" text="online" />
+            <Text fx:id="txtUsername" text="Not logged in"/>
+         </children>
+      </HBox>
+   </top>
+   <center>
+      <ScrollPane BorderPane.alignment="CENTER" fx:id="scrllpnMessages">
+
+      </ScrollPane>
+   </center>
+   <right>
+      <ScrollPane BorderPane.alignment="CENTER">
+         <content>
+            <VBox fx:id="vbxUsers" prefHeight="200.0" prefWidth="100.0" />
+         </content>
+      </ScrollPane>
+   </right>
+   <left>
+      <ScrollPane BorderPane.alignment="CENTER">
+         <content>
+            <VBox fx:id="vbxRooms" prefHeight="200.0" prefWidth="100.0" />
+         </content>
+      </ScrollPane>
+   </left>
+   <bottom>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <ScrollPane>
+               <content>
+                  <TextArea fx:id="txtrWriteMessage" />
+               </content>
+            </ScrollPane>
+            <Button mnemonicParsing="false" onAction="#sendMessage" text="Send" />
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>
