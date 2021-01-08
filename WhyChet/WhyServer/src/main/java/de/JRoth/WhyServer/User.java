@@ -1,6 +1,7 @@
 package de.JRoth.WhyServer;
 
 import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -97,6 +98,11 @@ public class User {
         this.handler = handler;
         myRoom = server.getRooms().get(0);
         myRoom.addMember(this);
+
+        //Sends Rooms to user
+        for (Room i : server.getRooms()){
+            sendMessage(RoomMessage.addRoomMessage(LiteObjectFactory.makeLite(i)));
+        }
 
         //Sends online notification
         for(User i : server.getUsers().values()){

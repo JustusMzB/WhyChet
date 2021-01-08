@@ -1,7 +1,9 @@
 package de.JRoth.WhyServer;
 
+import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteUser;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.RoomMessage;
+import de.JRoth.WhyChet.WhyShareClasses.Messages.UserMessage;
 import javafx.beans.property.StringProperty;
 
 import java.io.IOException;
@@ -51,6 +53,9 @@ public class Room {
     public void addMessage(Message message) {
         if (message.getRoomID() == id) {
             chat.add(message);
+            for(User i : getMembers()){
+                i.sendMessage(message);
+            }
             server.displayType().chatMessage(message, id);
         }
     }
@@ -61,6 +66,12 @@ public class Room {
             user.setRoom(this);
             RoomMessage roomMessage = RoomMessage.setRoomMessage(LiteObjectFactory.makeLite(this));
             user.sendMessage(roomMessage);
+
+            //Update for other members
+            LiteUser liteUser = LiteObjectFactory.makeLite(user);
+            for (User i : members){
+                i.sendMessage(UserMessage.getInfoMessage(liteUser));
+            }
 
             //UI update
             server.displayType().memberJoined(this, user);
@@ -73,6 +84,14 @@ public class Room {
     public void removeMember(User user) {
         members.remove(user);
         //Up for discussion: Notify the client that the user is not in a room
+
+        //Notification of fellow members
+        LiteUser liteUser = LiteObjectFactory.makeLite(user);
+        for (User i : members){
+            i.sendMessage(UserMessage.getLeaveMessage(liteUser));
+        }
+
+        //UI update
         server.displayType().memberLeft(this, user);
     }
 

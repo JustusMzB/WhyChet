@@ -7,3 +7,4 @@ ID          Text Parameter          String Representation       Effect
 -6          username                                            UserMessage containing LiteUser is evaluated and overrides existing entry
 -7          username                /login                      sends the server login data for evaluation
 -8          Response                                            gives the client feedback on the success of its request
+-9          username                                            The user left a room

@@ -19,4 +19,8 @@ public interface UI {
     void logOff();
 
     void setUsername(String userName);
+
+    void setMyRoom(LiteRoom myRoom);
+
+    void deleteUser(LiteUser leavingUser);
 }

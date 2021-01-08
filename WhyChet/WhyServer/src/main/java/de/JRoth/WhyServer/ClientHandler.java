@@ -47,28 +47,32 @@ public class ClientHandler extends Terminateable {
         String username = null;
         String password = null;
         LoginMessage login = null;
-        Message receivedMessage;
+        Message receivedMessage = null;
 
 
         boolean loginSuccess = false;
 
         while (!loginSuccess) {
 
-            try {
-                //receiving a proper loginmessage
-                do {
+            //receiving a proper loginmessage
+            do {
+                try {
                     receivedMessage = receiveMessage();
-                } while (receivedMessage.getRoomID() != -7);
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            } while (receivedMessage.getRoomID() != -7);
 
+            try {
                 login = (LoginMessage) receivedMessage;
                 username = login.getUserName();
                 password = login.getPassword();
 
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (NullPointerException e) {
                 e.printStackTrace();
                 terminate();
             }
-
 
 
             try {
@@ -77,12 +81,12 @@ public class ClientHandler extends Terminateable {
                 if (server.getUsers().containsKey(username)) {
                     //Username is taken
                     if (server.getUsers().get(username).isOnline()) { //User already online
-                        sendMessage(new ServerResponse(false));
+                        sendMessage(new ServerResponse(false, "User is already online"));
                     } else if (server.getUsers().get(username).hasPassword(password)) {//User offline: Password check
                         loginSuccess = true;
                         user = server.getUsers().get(username);
                     } else {
-                        sendMessage(new ServerResponse(false));
+                        sendMessage(new ServerResponse(false, "Wrong Password"));
                     }
                     //Username is unknown
                 } else {
@@ -99,34 +103,37 @@ public class ClientHandler extends Terminateable {
         }
         //Login successful
         //This will still be reached upon exception, creating user Uninitialized
-        try {
-            sendMessage(new ServerResponse(true));
-        } catch (IOException e) {
-            display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
-            e.printStackTrace();
-            terminate();
-        }
-        user.logOn(this);
-        try {
-            sendText("Users Online:\n" + onlineUserString());
-            sendMessage(RoomMessage.setRoomMessage(makeLite(user.getRoom())));
-        } catch (IOException e) {
-            display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
-            e.printStackTrace();
-            terminate();
-        }
+        if (loginSuccess) {
+            try {
+                sendMessage(new ServerResponse(true, "Login Successful"));
+            } catch (IOException e) {
+                display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
+                e.printStackTrace();
+                terminate();
+            }
+            user.logOn(this);
+            new InputHandler().start();
+            try {
+                sendText("Users Online:\n" + onlineUserString());
+                sendMessage(RoomMessage.setRoomMessage(makeLite(user.getRoom())));
+            } catch (IOException e) {
+                display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
+                e.printStackTrace();
+                terminate();
+            }
 
+        }
     }
 
     //Chat Dialogue
     private void chatService() {
-        int messageAmount = server.getRooms().get(0).size();
+        int messageAmount = user.getRoom().size();
         inputHandler.start();
         while (running.get()) {
             //EXTRA CAUTION IN FOR LOOP: If sendmessage fails, it extends the chat by 1 through attempting to disconnect
-            for (int i = messageAmount; messageAmount < server.getRooms().get(0).size() && client.isConnected(); i++) {
+            for (int i = messageAmount; messageAmount < user.getRoom().size() && client.isConnected(); i++) {
                 try {
-                    sendMessage(server.getRooms().get(0).getMessage(i));
+                    sendMessage(user.getRoom().getMessage(i));
                 } catch (IOException e) {
                     display.errLog("[CLIENTHANDLER] " + client + user.getName() + " Failed to update its Chat");
                     e.printStackTrace();
@@ -157,7 +164,7 @@ public class ClientHandler extends Terminateable {
         running.set(true);
         //Login
         login();
-        chatService();
+        //chatService();
     }
 
     //Helper Methods
@@ -212,6 +219,7 @@ public class ClientHandler extends Terminateable {
                 }
                 case -3: {
                     switchRoom(order);
+                    break;
                 }
                 default:
                     display.errLog("Received unknown order ID: " + order.getRoomID() + " from user " + user.getName());
@@ -239,9 +247,11 @@ public class ClientHandler extends Terminateable {
 
         @Override
         public void run() {
+            display.log("[SERVER] [CLIENTHANDLER] " + user.getName() + " Client-Listener started");
             while (running.get()) {
                 try {
                     Message message = (Message) (msgIn.readObject());
+                    server.displayType().log("[SERVER] [CLIENTHANDLER] " + user.getName() + "Sent something in ");
                     if (message.getRoomID() > 0) {
                         messageHandler(message);
                     } else {

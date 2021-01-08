@@ -7,7 +7,7 @@ public class RoomMessage extends Message{
         return room;
     }
 
-    public RoomMessage addRoomMessage(LiteRoom room){
+    public static RoomMessage addRoomMessage(LiteRoom room){
         return new RoomMessage(room, -4);
     }
     private RoomMessage(LiteRoom room, long orderID){ //Addroom-Conform RoomMessage

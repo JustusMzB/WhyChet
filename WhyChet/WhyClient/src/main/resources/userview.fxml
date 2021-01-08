@@ -8,6 +8,6 @@
 <HBox fx:controller="de.JRoth.WhyClient.Gui.UserGRep" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Text fx:id="txtUsername" strokeType="OUTSIDE" strokeWidth="0.0" text="Username" />
-      <RadioButton fx:id="rbOnline" mnemonicParsing="false" text="Online" />
+      <RadioButton fx:id="rbOnline" mnemonicParsing="false" text="Online" disable="true" />
    </children>
 </HBox>

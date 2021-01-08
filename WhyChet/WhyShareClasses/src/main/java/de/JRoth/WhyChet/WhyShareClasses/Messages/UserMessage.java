@@ -8,6 +8,10 @@ public class UserMessage extends Message {
         this.user = user;
     }
 
+    public static UserMessage getLeaveMessage(LiteUser user){
+        return new UserMessage(user, -9);
+    }
+
     public static UserMessage getInfoMessage(LiteUser user){
         return new UserMessage(user, -6);
     }

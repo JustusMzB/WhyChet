@@ -11,8 +11,8 @@ public class ServerResponse extends Message{
         super(sender, content, roomID);
     }
 
-    public ServerResponse(boolean success){
-        super("[SERVER]", "Response", -8);
+    public ServerResponse(boolean success, String content){
+        super("[SERVER]", content, -8);
         this.success = success;
     }
 }

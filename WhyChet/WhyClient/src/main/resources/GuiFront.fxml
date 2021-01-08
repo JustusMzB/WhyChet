@@ -24,14 +24,14 @@
       </ScrollPane>
    </center>
    <right>
-      <ScrollPane BorderPane.alignment="CENTER">
+      <ScrollPane fx:id="scrllpnUsers" BorderPane.alignment="CENTER">
          <content>
             <VBox fx:id="vbxUsers" prefHeight="200.0" prefWidth="100.0" />
          </content>
       </ScrollPane>
    </right>
    <left>
-      <ScrollPane BorderPane.alignment="CENTER">
+      <ScrollPane fx:id="scrllpnRooms" BorderPane.alignment="CENTER">
          <content>
             <VBox fx:id="vbxRooms" prefHeight="200.0" prefWidth="100.0" />
          </content>

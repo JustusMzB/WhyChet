@@ -16,12 +16,13 @@ public class UserGRep {
     @FXML
     Text txtUsername;
 
+
     void updateOnline(boolean online){
         rbOnline.setSelected(online);
     }
 
     static Component makeUserComponent(LiteUser user){
-        FXMLLoader loader = new FXMLLoader(UserGRep.class.getResource("userview.fxml"));
+        FXMLLoader loader = new FXMLLoader(UserGRep.class.getResource("/userview.fxml"));
         Node node = null;
         UserGRep controls = null;
         try {

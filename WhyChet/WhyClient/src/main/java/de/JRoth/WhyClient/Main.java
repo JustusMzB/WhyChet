@@ -18,7 +18,7 @@ public class Main extends Application {
         GuiFassade gui = loader.getController();
 
         Client client = new Client(1969, gui);
-        gui.setClient(client);
+        gui.bootStrap(client);
 
         primaryStage.setTitle("WhyClient");
         primaryStage.setScene(primeScene);
