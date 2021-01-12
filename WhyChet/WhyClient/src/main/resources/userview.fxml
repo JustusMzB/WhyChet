@@ -5,9 +5,6 @@
 <?import javafx.scene.text.Text?>
 
 
-<HBox fx:controller="de.JRoth.WhyClient.Gui.UserGRep" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <Text fx:id="txtUsername" strokeType="OUTSIDE" strokeWidth="0.0" text="Username" />
-      <RadioButton fx:id="rbOnline" mnemonicParsing="false" text="Online" disable="true" />
-   </children>
-</HBox>
+<?import javafx.scene.control.Label?>
+<Label styleClass="componentView" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyClient.Gui.UserGRep" fx:id="txtUsername" text="Username" />
+

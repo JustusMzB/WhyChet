@@ -7,12 +7,12 @@ import de.JRoth.WhyClient.Client;
 import de.JRoth.WhyClient.UI;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
@@ -34,7 +34,9 @@ public class GuiFassade implements UI, Initializable {
     @FXML
     ScrollPane scrllpnMessages;
     @FXML
-    Text txtUsername;
+    Label txtUsername;
+    @FXML
+    Label lblRoomName;
 
 
     private Messages messageControls = new Messages();
@@ -52,10 +54,18 @@ public class GuiFassade implements UI, Initializable {
         scrllpnUsers.setContent(userControls);
     }
 
-
+    @FXML
+    void sendMessageOnEnter(KeyEvent event){
+        //ShiftEnter allows line break, Enter allows message send
+        if(event.getCode() == KeyCode.ENTER){
+            if(event.isControlDown()){
+                sendMessage(event);
+            }
+        }
+    }
 
     @FXML
-    void sendMessage(ActionEvent event){
+    void sendMessage(Event event){
         String content = txtrWriteMessage.getText();
         client.sendMessage(content);
         txtrWriteMessage.setText("");
@@ -115,11 +125,16 @@ public class GuiFassade implements UI, Initializable {
 
     @Override
     public void logOff() {
-        txtUsername.setText("Not logged in");
-        rbOnline.setDisable(false);
+        Platform.runLater(() -> {
+            txtUsername.setText("Not logged in");
+            lblRoomName.setText("");
+            rbOnline.setDisable(false);
+            messageControls.getChildren().clear();
+        });
+
         roomControls.clear();
         userControls.clear();
-        messageControls.getChildren().clear();
+
     }
 
     @Override
@@ -130,8 +145,10 @@ public class GuiFassade implements UI, Initializable {
     @Override
     public void setMyRoom(LiteRoom myRoom) {
         roomUpdate(myRoom);
+
         Platform.runLater(() -> {
             messageControls.getChildren().clear();
+            lblRoomName.setText(myRoom.getRoomName());
         });
         userControls.setVisibleUsers(myRoom.getUsers());
 

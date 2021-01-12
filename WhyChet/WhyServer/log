@@ -1,11 +1,22 @@
 [SERVER] New room 1 is being added.
-[SERVER] Waiting for Client....
 [SERVER] New room 2 is being added.
 [SERVER] New room 3 is being added.
-[SERVER] j was banned
-[SERVER] j was unbanned
+[SERVER] Waiting for Client....
+[SERVER] New Client connected.
+[SERVER] Waiting for Client....
+[SERVER] User j joined room 1
+[CLIENTHANDLER] j was notified: "User j Joined the room."
+[SERVER] [CLIENTHANDLER] j Client-Listener started
+[SERVER] [CLIENTHANDLER] jSent something in 
+[CLIENTHANDLER]j Sent in a Message:j
+
+[SERVER] a Message is being distributed via Room  1
+[SERVER] [CLIENTHANDLER] jSent something in 
+[CLIENTHANDLER]j Received an order
+[USER] j is being logged off
+[SERVER] User j left room 1
+[SERVER] [CLIENTHANDLER] Socket[addr=/127.0.0.1,port=61936,localport=1969] Terminating Clienthandler for j
+[SERVER] [CLIENTHANDLER]23 Client of j was disconnected. Clienthandler will close.
 [SERVER] Clientsearch was stopped
-[SERVER] Rooms are being stored
-[SERVER] Credentials are being stored
 [SERVER] Rooms are being stored
 [SERVER] Credentials are being stored

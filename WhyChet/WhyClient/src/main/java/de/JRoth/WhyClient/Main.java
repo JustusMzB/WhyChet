@@ -15,6 +15,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/GuiFront.fxml"));
         Scene primeScene = new Scene(loader.load());
+        primeScene.getStylesheets().add("GeneralStyles.css");
         GuiFassade gui = loader.getController();
 
         client = new Client(1969, gui);

@@ -57,7 +57,9 @@ public class Client {
 
     public void setLoggedIn(boolean b) {
         isLoggedIn.set(b);
-        ui.logOff();
+        if(!b) {
+            ui.logOff();
+        }
     }
 
     public void login() {

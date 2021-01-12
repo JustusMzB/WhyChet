@@ -8,6 +8,9 @@ import java.util.HashMap;
 
 public class Messages extends VBox {
     private HashMap<Message, Component> views = new HashMap<>();
+    Messages(){
+        this.getStyleClass().add("componentContainer");
+    }
 
     public void addMessage(Message message){
         Component newMessageView = MessageView.makeMsgView(message);

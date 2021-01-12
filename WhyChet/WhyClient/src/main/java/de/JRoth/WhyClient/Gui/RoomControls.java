@@ -27,12 +27,16 @@ public class RoomControls extends VBox {
     public void updateRoom(LiteRoom room){
         Component newRoomComp = RoomComponent.makeComponent(room, client);
         Component oldRoomView = roomComponents.get(room.getRoomId());
-        roomComponents.put(room.getRoomId(), newRoomComp);
-        if (oldRoomView != null) {
-            Platform.runLater(() -> {
-                super.getChildren().remove(oldRoomView.getView());
-                super.getChildren().add(newRoomComp.getView());
-            });
+        int oldIndex = -1;
+        if(oldRoomView != null) {
+            oldIndex  = super.getChildren().indexOf(oldRoomView.getView());
+        }
+            roomComponents.put(room.getRoomId(), newRoomComp);
+            if (oldIndex != -1) {
+                int finalOldIndex = oldIndex;
+                Platform.runLater(() -> {
+                    super.getChildren().set(finalOldIndex, newRoomComp.getView());
+                });
         } else {
             Platform.runLater(() -> {
                 super.getChildren().add(newRoomComp.getView());

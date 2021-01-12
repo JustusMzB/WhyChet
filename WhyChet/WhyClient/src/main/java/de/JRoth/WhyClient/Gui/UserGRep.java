@@ -4,6 +4,7 @@ import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteUser;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -14,12 +15,8 @@ public class UserGRep {
     @FXML
     RadioButton rbOnline;
     @FXML
-    Text txtUsername;
+    Label txtUsername;
 
-
-    void updateOnline(boolean online){
-        rbOnline.setSelected(online);
-    }
 
 
     static Component makeUserComponent(LiteUser user){
@@ -32,7 +29,6 @@ public class UserGRep {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        controls.updateOnline(user.isOnline());
         controls.txtUsername.setText(user.getName());
         return new Component(node, controls);
     }

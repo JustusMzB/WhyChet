@@ -33,10 +33,10 @@ public class UserControls extends VBox {
         if(userComponents.containsKey(user.getName())){
             Node oldView = userComponents.get(user.getName()).getView();
             userComponents.put(user.getName(), newUserComp );
+            int oldInd = super.getChildren().indexOf(oldView);
+            if(oldInd != -1)
             Platform.runLater(() -> {
-                super.getChildren().remove(oldView);
-                System.out.println("Removed view of " + user.getName());
-                super.getChildren().add(newUserView);
+                super.getChildren().set(oldInd, newUserComp.getView());
             });
         } else {
             userComponents.put(user.getName(), newUserComp);

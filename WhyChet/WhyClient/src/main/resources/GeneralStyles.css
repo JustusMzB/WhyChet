@@ -1,0 +1,24 @@
+.root{
+    -fx-background-color: transparent;
+}
+.componentView {
+    -fx-background-color: slategrey;
+    -fx-text-fill: whitesmoke;
+    -fx-highlight-text-fill: greenyellow;
+    -fx-prompt-text-fill: #a9a9a9;
+    -fx-border-color: lightgray;
+    -fx-padding: 2;
+}
+
+.infoTag {
+    -fx-label-padding: 0 0 0 10;
+}
+
+.componentContainer {
+    -fx-background-color: transparent;
+    -fx-spacing: 5;
+}
+
+.inputArea {
+    -fx-prompt-text-fill: #a9a9a9;
+}

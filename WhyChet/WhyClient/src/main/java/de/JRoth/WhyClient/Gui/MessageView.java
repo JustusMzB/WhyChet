@@ -4,6 +4,7 @@ import de.JRoth.WhyChet.WhyShareClasses.Messages.Message;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.text.Text;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.io.IOException;
 
 public class MessageView{
     @FXML
-    Text txtContent;
+    Label txtContent;
 
     public Message getMessage() {
         return message;
