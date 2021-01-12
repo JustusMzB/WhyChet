@@ -3,9 +3,11 @@ package de.JRoth.WhyClient.Gui;
 import de.JRoth.WhyChet.WhyShareClasses.Messages.LiteRoom;
 import de.JRoth.WhyClient.Client;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class RoomControls extends VBox {
@@ -37,5 +39,22 @@ public class RoomControls extends VBox {
             });
         }
 
+    }
+
+    public void deleteRoom(LiteRoom room) {
+        deleteRoom(room.getRoomId());
+    }
+
+    private void deleteRoom(Long id){
+        Node toRemove = roomComponents.get(id).getView();
+        roomComponents.remove(id);
+        Platform.runLater(() -> super.getChildren().remove(toRemove));
+    }
+
+    public void clear(){
+        LinkedList<Long> idClone = new LinkedList<Long>(roomComponents.keySet());
+        for (Long i: idClone){
+        deleteRoom(i);
+        }
     }
 }

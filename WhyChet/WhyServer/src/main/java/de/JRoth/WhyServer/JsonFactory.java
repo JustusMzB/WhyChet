@@ -27,6 +27,7 @@ public class JsonFactory {
         JSONObject jUser = new JSONObject();
         jUser.put("name", user.getName());
         jUser.put("pw", user.getPassHash());
+        jUser.put("isBanned", user.isBanned());
         return jUser;
     }
 

@@ -60,10 +60,14 @@ public class JsonPersistence implements PersistenceService{
             HashMap<String, User> result = new HashMap<>();
             jusers.forEach(juser -> {
                 User user = new User(((JSONObject)juser).getString("name"), ((JSONObject)juser).getInt("pw"), server);
+                if(((JSONObject) juser).getBoolean("isBanned")){
+                    user.ban();
+                }
                 result.put(user.getName(), user);
             });
             return result;
         } catch (IOException e) {
+            server.displayType().log("Users could not be loaded, probably, none were stored.");
             e.printStackTrace();
             return null;
         }
@@ -87,6 +91,7 @@ public class JsonPersistence implements PersistenceService{
             });
             return result;
         } catch (IOException e) {
+            server.displayType().log("Rooms could not be loaded. Likely, none were stored.");
             e.printStackTrace();
             return null;
         }

@@ -16,7 +16,9 @@ public class Rooms extends Accordion {
 
     public void removeRoom(Room room) {
         Node soughtChild = children.get(room.getId());
-        Platform.runLater(() -> super.getChildren().remove(soughtChild));
+        children.remove(room.getId());
+        controllers.remove(room.getId());
+        Platform.runLater(() -> super.getPanes().remove(soughtChild));
     }
 
     void addRoom(Room room){

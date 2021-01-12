@@ -110,13 +110,16 @@ public class GuiFassade implements UI, Initializable {
 
     @Override
     public void deleteRoom(LiteRoom room) {
-
+        roomControls.deleteRoom(room);
     }
 
     @Override
     public void logOff() {
         txtUsername.setText("Not logged in");
         rbOnline.setDisable(false);
+        roomControls.clear();
+        userControls.clear();
+        messageControls.getChildren().clear();
     }
 
     @Override
@@ -137,14 +140,17 @@ public class GuiFassade implements UI, Initializable {
     @Override
     public void deleteUser(LiteUser leavingUser) {
         userControls.deleteUser(leavingUser);
+        out(leavingUser.getName() + " User is being removed");
     }
 
     @FXML
     private void toggleOnline(ActionEvent event) {
         if(!client.isLoggedIn()){
+            rbOnline.setSelected(client.isLoggedIn());
             client.login();
             rbOnline.setSelected(client.isLoggedIn());
         } else {
+            rbOnline.setSelected(client.isLoggedIn());
             client.closeConnection();
             rbOnline.setSelected(client.isLoggedIn());
         }

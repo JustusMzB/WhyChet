@@ -21,6 +21,7 @@ public class UserGRep {
         rbOnline.setSelected(online);
     }
 
+
     static Component makeUserComponent(LiteUser user){
         FXMLLoader loader = new FXMLLoader(UserGRep.class.getResource("/userview.fxml"));
         Node node = null;

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import static de.JRoth.WhyServer.LiteObjectFactory.makeLite;
 
@@ -89,6 +90,9 @@ public class Room {
         LiteUser liteUser = LiteObjectFactory.makeLite(user);
         for (User i : members){
             i.sendMessage(UserMessage.getLeaveMessage(liteUser));
+
+
+            i.notify(user.getName() + " left the room.");
         }
 
         //UI update
@@ -110,5 +114,18 @@ public class Room {
     }
     public void setName(String newName) {
         name = newName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Room room = (Room) o;
+        return getId() == room.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }

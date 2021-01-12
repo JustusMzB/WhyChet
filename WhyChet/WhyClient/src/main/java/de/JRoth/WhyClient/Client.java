@@ -207,10 +207,9 @@ public class Client {
                 ui.userUpdate(user);
             } else if (id == -9) {
                 LiteUser leavingUser = ((UserMessage) message).getUser();
-                if (myRoom.getUsers().contains(leavingUser)) {
+                    ui.out("Removing user " + leavingUser.getName() + " from scope");
                     ui.deleteUser(leavingUser);
                     myRoom.getUsers().remove(leavingUser);
-                }
             } else {
                 ui.out("Received unknown Order");
             }

@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import java.io.IOException;
 
 public class User {
+    private BooleanProperty isBanned;
     private String name;
     private int passHash;
     private ClientHandler handler;
@@ -33,6 +34,25 @@ public class User {
         this.passHash = passHash;
         this.server = server;
         this.isOnline.set(false);
+        this.isBanned = new SimpleBooleanProperty(false);
+    }
+    public void ban(){
+        if (!isBanned()) {
+            this.logOff();
+            server.displayType().log("[SERVER] " + name + " was banned");
+            this.isBanned.set(true);
+        }
+    }
+
+    public boolean isBanned() {
+        return isBanned.get();
+    }
+
+    public void unBan(){
+        if(isBanned()) {
+            this.isBanned.set(false);
+            server.displayType().log("[SERVER] " + name + " was unbanned");
+        }
     }
     public void notify(String note){
         if (isOnline()) {
@@ -62,22 +82,23 @@ public class User {
         if(isOnline()) {
             server.displayType().log("[USER] " + name + " is being logged off");
             isOnline.set(false);
-
-            //Makes sure that the user is not in any room anymore
-            if (myRoom != null) {
-                myRoom.removeMember(this);
-                myRoom = null;
-            }
-            if (handler != null) {
-                handler.terminate();
-                this.handler = null;
-            }
             for (User i : server.getUsers().values()) {
                 if (i.isOnline()) {
                     i.notify(name + " went offline");
                 }
             }
         }
+
+        //Makes sure that the user is not in any room anymore
+        if (myRoom != null) {
+            myRoom.removeMember(this);
+            myRoom = null;
+        }
+        if (handler != null) {
+            handler.terminate();
+            this.handler = null;
+        }
+
     }
 
     void sendMessage(Message message) {
@@ -94,6 +115,13 @@ public class User {
     public void logOn(ClientHandler handler) {
         isOnline.set(true);
 
+        //Sends online notification
+        for(User i : server.getUsers().values()) {
+            if (!(i == this)) {
+                i.notify(name + " just came online.");
+            }
+        }
+
         //Puts the user in Global
         this.handler = handler;
         myRoom = server.getRooms().get(0);
@@ -104,12 +132,6 @@ public class User {
             sendMessage(RoomMessage.addRoomMessage(LiteObjectFactory.makeLite(i)));
         }
 
-        //Sends online notification
-        for(User i : server.getUsers().values()){
-            if (! (i == this)){
-                i.notify(name + " just came online.");
-            }
-        }
     }
 
     public void setPassword(String password) {

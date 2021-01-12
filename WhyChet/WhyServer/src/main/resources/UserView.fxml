@@ -14,8 +14,9 @@
          <contextMenu>
             <ContextMenu>
               <items>
-                <MenuItem fx:id="kick" mnemonicParsing="false" text="Kick" onAction="#kick"></MenuItem>
-                  <MenuItem fx:id="warn" mnemonicParsing="false" text="Warn" onAction="#warn"></MenuItem>
+                  <MenuItem fx:id="kick" mnemonicParsing="false" text="Kick" onAction="#kick"/>
+                  <MenuItem fx:id="warn" mnemonicParsing="false" text="Warn" onAction="#warn"/>
+                  <MenuItem fx:id="toggleBan" mnemonicParsing="false" text="Toggle ban" onAction="#toggleBan"/>
               </items>
             </ContextMenu>
          </contextMenu>

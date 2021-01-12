@@ -60,6 +60,7 @@ public class ClientHandler extends Terminateable {
                     receivedMessage = receiveMessage();
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
+                    terminate();
                     break;
                 }
             } while (receivedMessage.getRoomID() != -7);
@@ -83,8 +84,13 @@ public class ClientHandler extends Terminateable {
                     if (server.getUsers().get(username).isOnline()) { //User already online
                         sendMessage(new ServerResponse(false, "User is already online"));
                     } else if (server.getUsers().get(username).hasPassword(password)) {//User offline: Password check
-                        loginSuccess = true;
                         user = server.getUsers().get(username);
+                        if(!user.isBanned()){ // Check for ban
+                            loginSuccess = true;
+                        } else {
+                            sendMessage(new ServerResponse(false, "This account is banned."));
+                            user.logOff();
+                        }
                     } else {
                         sendMessage(new ServerResponse(false, "Wrong Password"));
                     }
@@ -114,7 +120,6 @@ public class ClientHandler extends Terminateable {
             user.logOn(this);
             new InputHandler().start();
             try {
-                sendText("Users Online:\n" + onlineUserString());
                 sendMessage(RoomMessage.setRoomMessage(makeLite(user.getRoom())));
             } catch (IOException e) {
                 display.errLog("[CLIENTHANDLER] " + client + "Had Exeption during Login");
@@ -235,11 +240,11 @@ public class ClientHandler extends Terminateable {
 
         private void switchRoom(Message message) {
             display.log("[CLIENTHANDLER] " + user.getName() + " Requests room switch to " + message.getContent());
-            user.getRoom().removeMember(user);
             RoomMessage roomMessage = (RoomMessage) message;
             long requestedId = roomMessage.getRoom().getRoomId();
             for (Room i : server.getRooms()) {
                 if (i.getId() == requestedId) {
+                    user.getRoom().removeMember(user);
                     i.addMember(user);
                 }
             }

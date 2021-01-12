@@ -3,4 +3,4 @@
 <?import javafx.scene.text.Text?>
 
 
-<Text fx:id="txtContent" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyClient.Gui.MessageView" />
+<Text styleClass="componentView" fx:id="txtContent" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.JRoth.WhyClient.Gui.MessageView" />

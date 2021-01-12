@@ -59,4 +59,14 @@ public class UserView implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         chckbxOnline.selectedProperty().bind(isOnline);
     }
+
+    public void toggleBan(ActionEvent event) {
+        if(user.isBanned()){
+            lblUsername.setText(user.getName());
+            user.unBan();
+        } else {
+            lblUsername.setText("BANNED: " + user.getName());
+            user.ban();
+        }
+    }
 }

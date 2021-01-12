@@ -55,7 +55,7 @@ public class Server extends Terminateable {
     private void roomUpdate(Room room){
         for(User i : users.values()){
             if(i.isOnline()){
-                Message updateMessage = RoomMessage.setRoomMessage(LiteObjectFactory.makeLite(room));
+                Message updateMessage = RoomMessage.addRoomMessage(LiteObjectFactory.makeLite(room));
                 try {
                     i.sendMessage(updateMessage);
                     displayService.log("[SERVER] User " + i.getName() + " was updated on changes to room " + room.getId());
@@ -150,6 +150,13 @@ public class Server extends Terminateable {
                 room.removeMember(i);
                 rooms.get(0).addMember(i);
             }
+            for (User i : users.values()){
+                //Creating a leave message according to order Standards
+                i.sendMessage(new Message("[Server]", String.valueOf(room.getId()), -5));
+            }
+            displayService.log("[SERVER][ROOMREMOVAL] Room " + room.getName() + "Was found: " + rooms.contains(room));
+            rooms.remove(room);
+
             displayService.removeRoom(room);
         }
     }

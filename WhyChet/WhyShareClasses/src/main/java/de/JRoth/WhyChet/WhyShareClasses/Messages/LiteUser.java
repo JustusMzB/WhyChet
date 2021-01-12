@@ -2,6 +2,7 @@ package de.JRoth.WhyChet.WhyShareClasses.Messages;
 
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class LiteUser implements Serializable {
     private String username;
@@ -22,5 +23,18 @@ public class LiteUser implements Serializable {
 
     public void setOnline(boolean online) {
         this.isOnline = online;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LiteUser liteUser = (LiteUser) o;
+        return username.equals(liteUser.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username);
     }
 }

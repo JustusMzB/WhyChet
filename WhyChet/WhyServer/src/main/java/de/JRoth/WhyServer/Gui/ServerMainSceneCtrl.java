@@ -19,8 +19,7 @@ import java.util.ResourceBundle;
 
 
 public class ServerMainSceneCtrl implements DisplayService, Initializable {
-    final LogService logService = new ConsoleLog();
-
+    final LogService logService = new PersistentLog();
 
     Server server;
     Users allUsers;
